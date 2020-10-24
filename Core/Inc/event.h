@@ -9,6 +9,22 @@
 #define INC_EVENT_H_
 
 #include "main.h"
+
+/*##### TO BE DEFINED #####*/
+/**
+ * 
+ * MAX_ANGLE_STANDING - max angle when standing
+ * 
+ * MAX_STANDING_SPEED - max speed when standing
+ * 
+ * MAX_ANGLE - max angle before emergency stop
+ * 
+ * TURNING_SPEED - initial turning speed
+ * 
+ * DRIVING_SPEED - initial driving speed
+ */
+/*#########################*/
+
 typedef struct event_t event_t;
 
 struct event_t {

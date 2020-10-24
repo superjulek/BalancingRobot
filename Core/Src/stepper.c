@@ -6,6 +6,7 @@
  */
 
 #include "stepper.h"
+#include "config.h"
 
 typedef struct private_stepper_t private_stepper_t;
 

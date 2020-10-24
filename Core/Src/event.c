@@ -9,6 +9,7 @@
 #include "PID.h"
 #include "stepper.h"
 #include "scheduler.h"
+#include "config.h"
 
 /* Imported variables */
 extern float angle;

@@ -7,6 +7,7 @@
 
 #include "PID.h"
 #include "math.h"
+#include "config.h"
 
 // Number of previous input signals held in memory
 #define HISTORY_SIZE 5

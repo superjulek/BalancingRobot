@@ -6,6 +6,7 @@
  */
 
 #include "scheduler.h"
+#include "config.h"
 
 typedef struct private_scheduler_t private_scheduler_t;
 

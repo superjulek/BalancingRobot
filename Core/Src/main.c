@@ -32,6 +32,7 @@
 #include "PID.h"
 #include "scheduler.h"
 #include "general.h"
+#include "config.h"
 
 /* USER CODE END Includes */
 

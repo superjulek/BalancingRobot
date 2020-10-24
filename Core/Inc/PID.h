@@ -13,27 +13,17 @@
 #include "general.h"
 #include "mpu6050.h"
 
-#define PID_FREQUENCY 250
-
-#define KP 50000.
-#define KI 00.
-#define KD 000.
-
-#define DEAD_ANGLE 0.1
-
-#define ANGLE_CORRECTION 0.002
-
-#define MAX_ANGLE_STANDING 0.7//
-
-#define MAX_STANDING_SPEED 4000//
-
-#define ACC_PART 0.004
-
-#define DELAY_COEF 0.09
-
-#define MOUNT_ERROR -1.0
-
-#define MAX_ANGLE 7
+/*##### TO BE DEFINED #####*/
+/**
+ * PID_FREQUENCY - frequency od PID (Hz) - TODO: move, used only for angle
+ * 
+ * ANGLE_CORRECTION - angle adjustment per cycle when standind
+ * 
+ * ACC_PART - accelerometer part in angle calculation
+ * 
+ * MOUNT_ERROR - mounting error set at startup
+ */
+/*#########################*/
 
 #define MAX_MOUNT_ANGLE_CORECTION_OUTPUT 1200
 #define MOUNT_ANGLE_CORECTION 0.003

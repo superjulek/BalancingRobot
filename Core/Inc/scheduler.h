@@ -11,7 +11,11 @@
 #include "main.h"
 #include "event.h"
 
-#define QUEUE_SIZE 50
+/*##### TO BE DEFINED #####*/
+/**
+ * QUEUE_SIZE - max number of events in que
+ */
+/*#########################*/
 
 typedef struct scheduler_t scheduler_t;
 

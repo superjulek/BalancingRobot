@@ -30,24 +30,24 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-Robot_v1.0.elf \
+Robot_v2.0.elf \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-Robot_v1.0.list \
+Robot_v2.0.list \
 
 OBJCOPY_BIN += \
-Robot_v1.0.bin \
+Robot_v2.0.bin \
 
 
 # All Target
-all: Robot_v1.0.elf secondary-outputs
+all: Robot_v2.0.elf secondary-outputs
 
 # Tool invocations
-Robot_v1.0.elf: $(OBJS) $(USER_OBJS) /home/juliusz/Documents/Dyplom/Code/Robot_v1.0/STM32F446RETX_FLASH.ld
-	arm-none-eabi-gcc -o "Robot_v1.0.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juliusz/Documents/Dyplom/Code/Robot_v1.0/STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Robot_v1.0.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Robot_v2.0.elf: $(OBJS) $(USER_OBJS) /home/juliusz/Documents/Robot_v2.0/STM32F446RETX_FLASH.ld
+	arm-none-eabi-gcc -o "Robot_v2.0.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juliusz/Documents/Robot_v2.0/STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Robot_v2.0.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -56,13 +56,13 @@ default.size.stdout: $(EXECUTABLES)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Robot_v1.0.list: $(EXECUTABLES)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Robot_v1.0.list"
+Robot_v2.0.list: $(EXECUTABLES)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "Robot_v2.0.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-Robot_v1.0.bin: $(EXECUTABLES)
-	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "Robot_v1.0.bin"
+Robot_v2.0.bin: $(EXECUTABLES)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "Robot_v2.0.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 

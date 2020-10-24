@@ -13,37 +13,27 @@
 
 #include "stm32f4xx_hal.h"
 
-/* Stepper acceleration in mrpss. MAX = 180 000 */
-/* Lower to avoid slipping */
-#define ACCELERATION 60000
-
-/* Ramp frequency in Hz */
-#define RAMP_FREQUENCY 100
-
-/* Stepper driver clock frequency in Hz */
-#define CLOCK_FREQUENCY 12000000
-
-/* Number of full steps per revolution */
-#define STEPS_PER_REVOLUTION 200
-
-/* Maximum speed in mrpm. MAX = 600 000 */
-#define MAX_SPEED 400000
-
-/* Maximum stepping interval (steering interval) in us */
-#define MAX_STEPPING_INTERVAL 4000
-
-/* Autoreload when idling */
-#define IDLE_AUTORELOAD 10
-
-#define TURNING_SPEED 25000
-
-#define DRIVING_SPEED 40000
-
-/* Select stepper driver */
-#define LV8719
-//#define DRV8825
+/*##### TO BE DEFINED #####*/
+/**
+ * ACCELERATION - stepper acceleration (mrpss)
+ * 
+ * RAMP_FREQUENCY - ramp frequency (Hz)
+ * 
+ * CLOCK_FREQUENCY - stepper driver clock frequency (Hz)
+ * 
+ * STEPS_PER_REVOLUTION - number of full steps per resolution
+ * 
+ * MAX_SPEED - max stepper speed (mrps)
+ * 
+ * MAX_STEPPING_INTERVAL - max stepping interval (us)
+ */
+/*#########################*/
 
 #define MICROSTEPPING_NOT_SUPPORTED 255
+
+//#define A4988
+//#define DRV8825
+#define LV8719
 
 typedef enum microstepping_t microstepping_t;
 typedef struct stepper_pins_t stepper_pins_t;
