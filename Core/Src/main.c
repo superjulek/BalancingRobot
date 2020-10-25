@@ -107,9 +107,6 @@ PID_coefs_t speed_PID_coefs = {
 		.KI_coef = 0.065,
 		.KD_coef = 0.000057,
 };
-/* Stepper variables */
-volatile int32_t left_period;
-volatile int32_t right_period;
 
 /* SHARED VARIABLES - copy as extern to event.c*/
 float angle;
@@ -151,8 +148,8 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	left_stepper = stepper_create(left_pins, &left_period, TRUE, &htim5, TIM_CHANNEL_1);
-	right_stepper = stepper_create(right_pins, &right_period, FALSE, &htim2, TIM_CHANNEL_1);
+	left_stepper = stepper_create(left_pins, TRUE, &htim5, TIM_CHANNEL_1);
+	right_stepper = stepper_create(right_pins, FALSE, &htim2, TIM_CHANNEL_1);
 	angle_PID = PID_create(angle_PID_coefs, 300, MAX_SPEED, 250, 0.1);
 	speed_PID = PID_create(speed_PID_coefs, 200, 1800., 250, 0.99);
 	scheduler = scheduler_create();

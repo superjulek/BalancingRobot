@@ -16,7 +16,8 @@ extern float mount_error;
 
 typedef struct private_PID_t private_PID_t;
 
-struct private_PID_t {
+struct private_PID_t
+{
 	/**
 	 * Public member
 	 */
@@ -47,25 +48,26 @@ struct private_PID_t {
 /**
  * Put signal in history
  */
-static void put_in_history (private_PID_t *this, float diff)
+static void put_in_history(private_PID_t *this, float diff)
 {
-	for (int  i = HISTORY_SIZE - 1; i > 0; --i)
+	for (int i = HISTORY_SIZE - 1; i > 0; --i)
 	{
-		this->previous_diffs[i] = this->previous_diffs[i-1];
+		this->previous_diffs[i] = this->previous_diffs[i - 1];
 	}
 	this->previous_diffs[0] = diff;
 }
 
-static float get_derivative (private_PID_t *this)
+static float get_derivative(private_PID_t *this)
 {
-	float derivative = (-11./6. * this->previous_diffs[0] + 3. * this->previous_diffs[1] -\
-			3./2. * this->previous_diffs[2] + 1./3. * this->previous_diffs[3]) \
-			* (float)this->frequency;
+	float derivative = (-11. / 6. * this->previous_diffs[0] + 3. * this->previous_diffs[1] -
+						3. / 2. * this->previous_diffs[2] + 1. / 3. * this->previous_diffs[3]) *
+					   (float)this->frequency;
 	return derivative;
 }
 
-METHOD(private_PID_t, reset, void, private_PID_t *this)
+static void reset(PID_t *public)
 {
+	private_PID_t *this = (private_PID_t *)public;
 	this->integral_sum = 0;
 	for (int i = 0; i < HISTORY_SIZE; ++i)
 	{
@@ -76,20 +78,22 @@ METHOD(private_PID_t, reset, void, private_PID_t *this)
 	this->desired_signal = 0;
 }
 
-METHOD(private_PID_t, set_desired_signal, void, private_PID_t *this, float desired_signal)
+static void set_desired_signal(PID_t *public, float desired_signal)
 {
+	private_PID_t *this = (private_PID_t *)public;
 	this->desired_signal = desired_signal;
 }
 
-METHOD(private_PID_t, tic, void, private_PID_t *this, float input_signal)
+static void tic(PID_t *public, float input_signal)
 {
+	private_PID_t *this = (private_PID_t *)public;
 	float diff = input_signal - this->desired_signal;
 	put_in_history(this, input_signal);
-	float integral_sum = this->integral_sum + diff / (float) this->frequency;
+	float integral_sum = this->integral_sum + diff / (float)this->frequency;
 	this->previous_output_signal = this->output_signal;
-	float output_signal = this->coefs.KP_coef * diff + \
-			this->coefs.KI_coef * integral_sum + \
-			this->coefs.KD_coef * get_derivative(this);
+	float output_signal = this->coefs.KP_coef * diff +
+						  this->coefs.KI_coef * integral_sum +
+						  this->coefs.KD_coef * get_derivative(this);
 	if (output_signal > this->max_output_signal)
 	{
 		this->output_signal = this->max_output_signal;
@@ -110,46 +114,53 @@ METHOD(private_PID_t, tic, void, private_PID_t *this, float input_signal)
 	}
 }
 
-METHOD(private_PID_t, get_output, int32_t, private_PID_t *this)
+static float get_output(PID_t *public)
 {
-	return (int32_t)this->output_signal;
+	private_PID_t *this = (private_PID_t *)public;
+	return this->output_signal;
 }
 
-METHOD(private_PID_t, get_output_smooth, int32_t, private_PID_t *this)
+static float get_output_smooth(PID_t *public)
 {
-	return (int32_t) (this->output_signal * (1.0 - this->delay_coef) + \
+	private_PID_t *this = (private_PID_t *)public;
+	return (this->output_signal * (1.0 - this->delay_coef) +
 			this->previous_output_signal * this->delay_coef);
 }
 
-METHOD(private_PID_t, live_tune, PID_coefs_t, private_PID_t *this, PID_coefs_t coefs)
+static void set_PID_coefs(PID_t *public, PID_coefs_t coefs)
 {
-	this->coefs.KP_coef *= 1 + coefs.KP_coef;
-	this->coefs.KI_coef *= 1 + coefs.KI_coef;
-	this->coefs.KD_coef *= 1 + coefs.KD_coef;
+	private_PID_t *this = (private_PID_t *)public;
+	this->coefs = coefs;
+}
 
+static PID_coefs_t get_PID_coefs(PID_t *public, PID_coefs_t coefs)
+{
+	private_PID_t *this = (private_PID_t *)public;
 	return this->coefs;
 }
 
-PID_t* PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float delay_coef)
+PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float delay_coef)
 {
-	private_PID_t *this;
-	INIT(this,
-			.public = {
-					.reset = _reset,
-					.set_desired_signal = _set_desired_signal,
-					.tic = _tic,
-					.get_output = _get_output,
-					.get_output_smooth = _get_output_smooth,
-					.live_tune = _live_tune,
-			},
-			.coefs = coefs,
-			.dead_band = dead_band,
-			.max_output_signal = max_output_signal,
-			.frequency = frequency,
-			.delay_coef = delay_coef);
+	private_PID_t *this = malloc(sizeof(private_PID_t));
+	*this = (private_PID_t){
+		.public = {
+			.reset = reset,
+			.set_desired_signal = set_desired_signal,
+			.tic = tic,
+			.get_output = get_output,
+			.get_output_smooth = get_output_smooth,
+			.set_PID_coefs = set_PID_coefs,
+			.get_PID_coefs = get_PID_coefs,
+		},
+		.coefs = coefs,
+		.dead_band = dead_band,
+		.max_output_signal = max_output_signal,
+		.frequency = frequency,
+		.delay_coef = delay_coef};
+
 	this->public.reset(&(this->public));
 
-	return &this->public;
+	return &(this->public);
 }
 
 float get_angle(void)
@@ -170,22 +181,24 @@ float get_angle(void)
 	}
 	float gyro_angle = angle - data.ry * 1 / PID_FREQUENCY;
 	angle = (1.0 - ACC_PART) * gyro_angle + ACC_PART * acc_angle;
-	return angle  - mount_error;
+	return angle - mount_error;
 }
 
-float get_angle_acc (void)
+float get_angle_acc(void)
 {
 	all_scaled data;
 	MPU6050_GetAllScaled(&data);
-	if (data.z == 0) return 90;
+	if (data.z == 0)
+		return 90;
 	float acc_angle = atan((float)data.x / (float)data.z) * 57.3 - mount_error;
 	return acc_angle;
 }
-float get_new_angle (float last_angle)
+float get_new_angle(float last_angle)
 {
 	all_scaled data;
 	MPU6050_GetAllScaled(&data);
-	if (data.z == 0) return 90;
+	if (data.z == 0)
+		return 90;
 	float acc_angle = atan((float)data.x / (float)data.z) * 57.3 - mount_error;
 	float gyro_angle = last_angle - data.ry * 1 / PID_FREQUENCY;
 	return (1.0 - ACC_PART) * gyro_angle + ACC_PART * acc_angle;

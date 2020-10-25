@@ -42,32 +42,35 @@ struct PID_t {
 	/**
 	 * Reset PID
 	 */
-	void (*reset) (PID_t *this);
+	void (*reset) (PID_t *public);
 
 	/**
 	 * Set desired signal
 	 */
-	void (*set_desired_signal) (PID_t *this, float desired_signal);
+	void (*set_desired_signal) (PID_t *public, float desired_signal);
 
 	/**
 	 * Do next time step
 	 */
-	void (*tic) (PID_t *this, float input_signal);
+	void (*tic) (PID_t *public, float input_signal);
 
 	/**
 	 * Get output
 	 */
-	int32_t (*get_output) (PID_t *this);
+	float (*get_output) (PID_t *public);
 
 	/**
 	 * Get output smooth
 	 */
-	int32_t (*get_output_smooth) (PID_t *this);
-
+	float (*get_output_smooth) (PID_t *public);
 	/**
-	 * Live - tune PID coefs
+	 * Set new PID coefs
 	 */
-	PID_coefs_t (*live_tune) (PID_t *this, PID_coefs_t coefs);
+	void (*set_PID_coefs) (PID_t *public, PID_coefs_t coefs);
+	/**
+	 * Get PID coefs
+	 */
+	PID_coefs_t (*get_PID_coefs) (PID_t *public);
 };
 
 /**

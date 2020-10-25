@@ -110,36 +110,36 @@ struct stepper_t {
 	/**
 	 * Start stepper operation
 	 */
-	void (*start) (stepper_t *this);
+	void (*start) (stepper_t *public);
 
 	/**
 	 * Set stepper microstepping
 	 *
 	 * @param microstepping		microstepping
 	 */
-	void (*set_microstepping) (stepper_t *this, microstepping_t microstepping);
+	void (*set_microstepping) (stepper_t *public, microstepping_t microstepping);
 
 	/**
 	 * Set desired speed
 	 *
 	 * @param speed				speed in mrpm
 	 */
-	void (*set_speed) (stepper_t *this, int32_t speed);
+	void (*set_speed) (stepper_t *public, int32_t speed);
 
 	/**
 	 * Ramp stepper speed
 	 */
-	void (*ramp) (stepper_t *this);
+	void (*ramp) (stepper_t *public);
 
 	/**
 	 * Stop stepper operation
 	 */
-	void (*stop) (stepper_t *this);
+	void (*stop) (stepper_t *public);
 };
 
 /**
  * Create stepper instance
  */
-stepper_t* stepper_create(stepper_pins_t pins, int32_t *period, bool reverse_direction, TIM_HandleTypeDef *timer, uint32_t channel);
+stepper_t* stepper_create(stepper_pins_t pins, bool reverse_direction, TIM_HandleTypeDef *timer, uint32_t channel);
 
 #endif /* INC_STEPPER_H_ */

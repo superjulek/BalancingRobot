@@ -11,6 +11,9 @@
 #include "scheduler.h"
 #include "config.h"
 
+#include <math.h>
+#include <stdio.h>
+
 /* Imported variables */
 extern float angle;
 extern float target_angle;
@@ -29,25 +32,25 @@ extern int32_t turning_speed_modified;
 extern float driving_speed_modified;
 /**/
 
-static void flash_LED_callback (void)
+static void flash_LED_callback(void)
 {
 	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 }
 
 event_t flash_LED = {
-		.action = flash_LED_callback,
+	.action = flash_LED_callback,
 };
 
-static void measure_angle_callback (void)
+static void measure_angle_callback(void)
 {
 	angle = get_new_angle(angle);
 }
 
 event_t measure_angle = {
-		.action = measure_angle_callback,
+	.action = measure_angle_callback,
 };
 
-static void wait_for_angle_callback (void)
+static void wait_for_angle_callback(void)
 {
 	if (fabs(angle) < 1)
 	{
@@ -57,71 +60,74 @@ static void wait_for_angle_callback (void)
 }
 
 event_t wait_for_angle = {
-		.action = wait_for_angle_callback,
+	.action = wait_for_angle_callback,
 };
 
-static void left_ramp_callback (void)
+static void left_ramp_callback(void)
 {
 	left_stepper->ramp(left_stepper);
 }
 
 event_t left_ramp = {
-		.action = left_ramp_callback,
+	.action = left_ramp_callback,
 };
 
-static void right_ramp_callback (void)
+static void right_ramp_callback(void)
 {
 	right_stepper->ramp(right_stepper);
 }
 
 event_t right_ramp = {
-		.action = right_ramp_callback,
+	.action = right_ramp_callback,
 };
 
-static void send_telemetry_callback (void)
+static void send_telemetry_callback(void)
 {
 	char buff[30];
-	sprintf(buff, "%.2f\t%.2f\t%d\n", angle, target_angle, (int)(angle_PID->get_output(angle_PID)/1000));
+	sprintf(buff, "%.2f\t%.2f\t%d\n", angle, target_angle, (int)(angle_PID->get_output(angle_PID) / 1000));
 	send_string(buff);
 }
 
 event_t send_telemetry = {
-		.action = send_telemetry_callback,
+	.action = send_telemetry_callback,
 };
 
-static void angle_PID_tic_callback (void)
+static void angle_PID_tic_callback(void)
 {
 	angle_PID->tic(angle_PID, angle);
-	int32_t speed = angle_PID->get_output_smooth(angle_PID);
+	int32_t speed = (int32_t)angle_PID->get_output_smooth(angle_PID);
 	int32_t turning = 0;
-	if (drive_command == 3) turning = turning_speed_modified;
-	if (drive_command == 4) turning = -turning_speed_modified;
+	if (drive_command == 3)
+		turning = turning_speed_modified;
+	if (drive_command == 4)
+		turning = -turning_speed_modified;
 	left_stepper->set_speed(left_stepper, speed - turning);
 	right_stepper->set_speed(right_stepper, speed + turning);
 }
 
 event_t angle_PID_tic = {
-		.action = angle_PID_tic_callback,
+	.action = angle_PID_tic_callback,
 };
 
-static void movement_control_tic_callback (void)
+static void movement_control_tic_callback(void)
 {
-	int32_t output = angle_PID->get_output(angle_PID);
+	int32_t output = (int32_t)angle_PID->get_output(angle_PID);
 	/* For smoother control */
 	static int32_t averaged_output = 0;
 	averaged_output = averaged_output * 0.05 + output * 0.95;
-	switch (drive_command){
+	switch (drive_command)
+	{
 	case LEFT:
 	case RIGHT:
 	case STOP:
-		if ((target_angle > - MAX_ANGLE_STANDING) && (output > MAX_STANDING_SPEED))
-			{
-				target_angle -= ANGLE_CORRECTION;
-			}
+		if ((target_angle > -MAX_ANGLE_STANDING) && (output > MAX_STANDING_SPEED))
+		{
+			target_angle -= ANGLE_CORRECTION;
+		}
 		if ((target_angle < MAX_ANGLE_STANDING) && (output < -MAX_STANDING_SPEED))
-			{
-				target_angle += ANGLE_CORRECTION;
-			}
+		{
+			target_angle += ANGLE_CORRECTION;
+		}
 		/* Slowly fix mount angle */
 		if (abs(output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT)
 		{
@@ -133,17 +139,17 @@ static void movement_control_tic_callback (void)
 	case BACKWARD:
 	case VELOCITY_BRAKE:
 		speed_PID->tic(speed_PID, averaged_output);
-		target_angle = -(float)speed_PID->get_output_smooth(speed_PID) / 1000.;
+		target_angle = -speed_PID->get_output_smooth(speed_PID) / 1000.;
 		break;
 	}
 	angle_PID->set_desired_signal(angle_PID, target_angle);
 }
 
 event_t movement_control_tic = {
-		.action = movement_control_tic_callback,
+	.action = movement_control_tic_callback,
 };
 
-static void restart_callback (void)
+static void restart_callback(void)
 {
 	scheduler->add_to_queue(scheduler, stop);
 	scheduler->add_to_queue(scheduler, restart_MPU);
@@ -151,10 +157,10 @@ static void restart_callback (void)
 }
 
 event_t restart = {
-		.action = restart_callback,
+	.action = restart_callback,
 };
 
-static void process_rbuf_callback (void)
+static void process_rbuf_callback(void)
 {
 	static bool tuning_angle = TRUE; //FALSE - tuning speed
 	switch (rbuf[0])
@@ -166,7 +172,8 @@ static void process_rbuf_callback (void)
 		scheduler->add_to_queue(scheduler, stop);
 		break;
 	case 2:
-		if (state == LAUNCHED){
+		if (state == LAUNCHED)
+		{
 			send_string("ALREADY RUNNING\n");
 		}
 		else if (state == STOPPED)
@@ -185,52 +192,57 @@ static void process_rbuf_callback (void)
 	case 6:
 	case 7:
 	case 8:
-	{}
 	{
-		PID_coefs_t increment = {
-				.KP_coef = 0,
-				.KI_coef = 0,
-				.KD_coef = 0,
-		};
-		float inc = 0.05;
-		if (rbuf[0] % 2 == 0) inc = - inc;
-		switch (rbuf[0] % 3)
-		{
-		case 0:
-			increment.KP_coef = inc;
-			break;
-		case 1:
-			increment.KI_coef = inc;
-			break;
-		case 2:
-			increment.KD_coef = inc;
-			break;
-		}
-		PID_coefs_t new;
-		if (tuning_angle)
-		{
-			new = angle_PID->live_tune(angle_PID, increment);
-		}
-		else
-		{
-			new = speed_PID->live_tune(speed_PID, increment);
-		}
-		char buff[12];
-		switch (rbuf[0] % 3)
-		{
-		case 0:
-			sprintf(buff, "\t%f\n", new.KP_coef);
-			break;
-		case 1:
-			sprintf(buff, "\t%f\n", new.KI_coef);
-			break;
-		case 2:
-			sprintf(buff, "\t%f\n", new.KD_coef);
-			break;
-		}
-		send_string(buff);
-		break;
 	}
+		{
+			PID_coefs_t current_coefs;
+			if (tuning_angle)
+			{
+				current_coefs = angle_PID->get_PID_coefs(angle_PID);
+			}
+			else
+			{
+				current_coefs = speed_PID->get_PID_coefs(speed_PID);
+			}
+			float inc = 0.05;
+			if (rbuf[0] % 2 == 0)
+				inc = -inc;
+			switch (rbuf[0] % 3)
+			{
+			case 0:
+				current_coefs.KP_coef *= (1 + inc);
+				break;
+			case 1:
+				current_coefs.KI_coef *= (1 + inc);
+				break;
+			case 2:
+				current_coefs.KD_coef *= (1 + inc);
+				break;
+			}
+			if (tuning_angle)
+			{
+				angle_PID->set_PID_coefs(angle_PID, current_coefs);
+			}
+			else
+			{
+				speed_PID->set_PID_coefs(speed_PID, current_coefs);
+			}
+			char buff[12];
+			switch (rbuf[0] % 3)
+			{
+			case 0:
+				sprintf(buff, "\t%f\n", current_coefs.KP_coef);
+				break;
+			case 1:
+				sprintf(buff, "\t%f\n", current_coefs.KI_coef);
+				break;
+			case 2:
+				sprintf(buff, "\t%f\n", current_coefs.KD_coef);
+				break;
+			}
+			send_string(buff);
+			break;
+		}
 	case 9:
 	{
 		driving_speed_modified *= 1.05;
@@ -267,7 +279,7 @@ static void process_rbuf_callback (void)
 	{
 		turning_speed_modified *= 1.05;
 		char buff[15];
-		sprintf(buff, "VT = %d\n", turning_speed_modified);
+		sprintf(buff, "VT = %ld\n", turning_speed_modified);
 		send_string(buff);
 		break;
 	}
@@ -278,7 +290,7 @@ static void process_rbuf_callback (void)
 	{
 		turning_speed_modified *= 0.95;
 		char buff[15];
-		sprintf(buff, "VT = %d\n", turning_speed_modified);
+		sprintf(buff, "VT = %ld\n", turning_speed_modified);
 		send_string(buff);
 		break;
 	}
@@ -321,10 +333,10 @@ static void process_rbuf_callback (void)
 }
 
 event_t process_rbuf = {
-		.action = process_rbuf_callback,
+	.action = process_rbuf_callback,
 };
 
-static void begin_waiting_callback (void)
+static void begin_waiting_callback(void)
 {
 	send_string("WAITING\n");
 	scheduler->add_to_queue(scheduler, reset_everything);
@@ -332,10 +344,10 @@ static void begin_waiting_callback (void)
 }
 
 event_t begin_waiting = {
-		.action = begin_waiting_callback,
+	.action = begin_waiting_callback,
 };
 
-static void reset_everything_callback (void)
+static void reset_everything_callback(void)
 
 {
 	target_angle = 0;
@@ -346,10 +358,10 @@ static void reset_everything_callback (void)
 	angle_PID->set_desired_signal(angle_PID, target_angle);
 }
 event_t reset_everything = {
-		.action = reset_everything_callback,
+	.action = reset_everything_callback,
 };
 
-static void launch_callback (void)
+static void launch_callback(void)
 {
 	send_string("START\n");
 	left_stepper->start(left_stepper);
@@ -358,12 +370,13 @@ static void launch_callback (void)
 }
 
 event_t launch = {
-		.action = launch_callback,
+	.action = launch_callback,
 };
 
-static void stop_callback (void)
+static void stop_callback(void)
 {
-	if (state != STOPPED){
+	if (state != STOPPED)
+	{
 		send_string("STOP\n");
 		left_stepper->stop(left_stepper);
 		right_stepper->stop(right_stepper);
@@ -377,10 +390,10 @@ static void stop_callback (void)
 }
 
 event_t stop = {
-		.action = stop_callback,
+	.action = stop_callback,
 };
 
-static void restart_MPU_callback (void)
+static void restart_MPU_callback(void)
 {
 	state = PROGRAM_CALIBRATING;
 	MPU6050_RestartInternal();
@@ -390,10 +403,10 @@ static void restart_MPU_callback (void)
 }
 
 event_t restart_MPU = {
-		.action = restart_MPU_callback,
+	.action = restart_MPU_callback,
 };
 
-static void emergency_check_callback (void)
+static void emergency_check_callback(void)
 {
 	if (fabs(angle) > MAX_ANGLE)
 	{
@@ -403,5 +416,5 @@ static void emergency_check_callback (void)
 }
 
 event_t emergency_check = {
-		.action = emergency_check_callback,
+	.action = emergency_check_callback,
 };

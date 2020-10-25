@@ -10,7 +10,8 @@
 
 typedef struct private_stepper_t private_stepper_t;
 
-struct private_stepper_t {
+struct private_stepper_t
+{
 	/**
 	 * Public member
 	 */
@@ -34,14 +35,11 @@ struct private_stepper_t {
 	uint8_t active;
 
 	int8_t reverse_direction;
-
-	/* Pointer for period variable */
-	int32_t *period;
 };
 
 uint32_t max_autoreload = MAX_STEPPING_INTERVAL * CLOCK_FREQUENCY / 1000000;
 
-static void change_speed (private_stepper_t *this, int32_t speed)
+static void change_speed(private_stepper_t *this, int32_t speed)
 {
 	uint32_t autoreload;
 	this->actual_speed = speed;
@@ -55,7 +53,7 @@ static void change_speed (private_stepper_t *this, int32_t speed)
 	}
 	if (speed != 0)
 	{
-		autoreload = (int32_t) (CLOCK_FREQUENCY * 30) / ((int32_t)this->microstepping * STEPS_PER_REVOLUTION) * 1000 / abs(speed);
+		autoreload = (int32_t)(CLOCK_FREQUENCY * 30) / ((int32_t)this->microstepping * STEPS_PER_REVOLUTION) * 1000 / abs(speed);
 		if (autoreload > max_autoreload)
 		{
 			//Nie potrzeba przy dużym microsteppingu
@@ -66,10 +64,12 @@ static void change_speed (private_stepper_t *this, int32_t speed)
 	{
 		return;
 	}
-		this->timer->Instance->ARR=autoreload;
+	this->timer->Instance->ARR = autoreload;
 }
-METHOD(private_stepper_t, start, void, private_stepper_t *this)
+
+static void start(stepper_t *public)
 {
+	private_stepper_t *this = (private_stepper_t *)public;
 	write_pin(this->pins.ENABLE, 0);
 	this->desired_speed = 0;
 	this->actual_speed = 0;
@@ -77,8 +77,9 @@ METHOD(private_stepper_t, start, void, private_stepper_t *this)
 	HAL_TIM_OC_Start(this->timer, this->channel);
 }
 
-METHOD(stepper_t, set_microstepping, void, private_stepper_t *this, microstepping_t microstepping)
+static void set_microstepping(stepper_t *public, microstepping_t microstepping)
 {
+	private_stepper_t *this = (private_stepper_t *)public;
 	uint8_t microstepping_bits;
 	switch (microstepping)
 	{
@@ -118,10 +119,11 @@ METHOD(stepper_t, set_microstepping, void, private_stepper_t *this, microsteppin
 	write_pin(this->pins.MS2, microstepping_bits & 0b010);
 	write_pin(this->pins.MS3, microstepping_bits & 0b001);
 	this->microstepping = microstepping;
-
 }
-METHOD(stepper_t, set_speed, void, private_stepper_t *this, int32_t speed)
+
+static void set_speed(stepper_t *public, int32_t speed)
 {
+	private_stepper_t *this = (private_stepper_t *)public;
 	if (speed > MAX_SPEED)
 	{
 		speed = MAX_SPEED;
@@ -133,8 +135,9 @@ METHOD(stepper_t, set_speed, void, private_stepper_t *this, int32_t speed)
 	this->desired_speed = speed;
 }
 
-METHOD(private_stepper_t, ramp, void, private_stepper_t *this)
+static void ramp(stepper_t *public)
 {
+	private_stepper_t *this = (private_stepper_t *)public;
 	if (this->active == 1)
 	{
 		int32_t diff = this->desired_speed - this->actual_speed;
@@ -153,39 +156,36 @@ METHOD(private_stepper_t, ramp, void, private_stepper_t *this)
 	}
 }
 
-
-METHOD(private_stepper_t, stop, void, private_stepper_t *this)
+static void stop(stepper_t *public)
 {
+	private_stepper_t *this = (private_stepper_t *)public;
 	write_pin(this->pins.ENABLE, 1);
 	this->desired_speed = 0;
 	this->actual_speed = 0;
-	*(this->period) = 0;
 	this->active = 0;
 	HAL_TIM_OC_Stop(this->timer, this->channel);
 }
 
-stepper_t* stepper_create(stepper_pins_t pins, int32_t *period, bool reverse_direction, TIM_HandleTypeDef *timer, uint32_t channel)
+stepper_t *stepper_create(stepper_pins_t pins, bool reverse_direction, TIM_HandleTypeDef *timer, uint32_t channel)
 {
-	private_stepper_t* this;
-	INIT(this,
-			.public = {
-					.start = _start,
-					.set_microstepping = _set_microstepping,
-					.set_speed = _set_speed,
-					.ramp = _ramp,
-					.stop = _stop,
-			},
-			.pins = pins,
-			.active = 0,
-			.max_delta_speed = ACCELERATION * 60 / RAMP_FREQUENCY,
-			.reverse_direction = reverse_direction ? -1 : 1,
-			.period = period,
-			.timer = timer,
-			.channel = channel,
-			);
+	private_stepper_t *this = malloc(sizeof(private_stepper_t));
+	*this = (private_stepper_t){
+		.public = {
+			.start = start,
+			.set_microstepping = set_microstepping,
+			.set_speed = set_speed,
+			.ramp = ramp,
+			.stop = stop,
+		},
+		.pins = pins,
+		.active = 0,
+		.max_delta_speed = ACCELERATION * 60 / RAMP_FREQUENCY,
+		.reverse_direction = reverse_direction ? -1 : 1,
+		.timer = timer,
+		.channel = channel,
+	};
 
 	this->public.set_microstepping(&(this->public), STEPS_FULL);
-	*(this->period) = 0;
 
-	return &this->public;
+	return &(this->public);
 }

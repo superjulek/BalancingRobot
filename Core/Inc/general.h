@@ -33,15 +33,6 @@ void write_pin (pin_t pin, GPIO_PinState state);
 
 void send_string (char *string);
 
-#define METHOD(iface, name, ret, this, ...) \
-	static ret name(union {iface *_public; this;} \
-	__attribute__((transparent_union)), ##__VA_ARGS__); \
-	static typeof(name) *_##name = (typeof(name)*)name; \
-	static ret name(this, ##__VA_ARGS__)
-
-#define INIT(this, ...) { (this) = malloc(sizeof(*(this))); \
-						   *(this) = (typeof(*(this))){ __VA_ARGS__ }; }
-
 #define bool uint8_t
 
 #define TRUE 1
