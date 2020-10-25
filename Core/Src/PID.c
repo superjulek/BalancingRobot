@@ -25,7 +25,7 @@ struct private_PID_t
 
 	float desired_signal;
 
-	// First latest
+	// First in table is most recent value
 	float previous_diffs[HISTORY_SIZE];
 
 	float integral_sum;
@@ -161,47 +161,6 @@ PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, u
 	this->public.reset(&(this->public));
 
 	return &(this->public);
-}
-
-float get_angle(void)
-{
-	static float angle = MOUNT_ERROR;
-	static uint8_t first_time_flag = TRUE;
-	all_scaled data;
-	MPU6050_GetAllScaled(&data);
-	float acc_angle = ((float)data.x / (float)data.z) * 57.3;
-	if (data.z == 0)
-	{
-		acc_angle = angle;
-	}
-	if (first_time_flag)
-	{
-		first_time_flag = FALSE;
-		angle = acc_angle;
-	}
-	float gyro_angle = angle - data.ry * 1 / PID_FREQUENCY;
-	angle = (1.0 - ACC_PART) * gyro_angle + ACC_PART * acc_angle;
-	return angle - mount_error;
-}
-
-float get_angle_acc(void)
-{
-	all_scaled data;
-	MPU6050_GetAllScaled(&data);
-	if (data.z == 0)
-		return 90;
-	float acc_angle = atan((float)data.x / (float)data.z) * 57.3 - mount_error;
-	return acc_angle;
-}
-float get_new_angle(float last_angle)
-{
-	all_scaled data;
-	MPU6050_GetAllScaled(&data);
-	if (data.z == 0)
-		return 90;
-	float acc_angle = atan((float)data.x / (float)data.z) * 57.3 - mount_error;
-	float gyro_angle = last_angle - data.ry * 1 / PID_FREQUENCY;
-	return (1.0 - ACC_PART) * gyro_angle + ACC_PART * acc_angle;
 }
 
 float follow_angle(int32_t speed, float desired_angle)

@@ -1,27 +1,12 @@
 /*
- * mpu6050.h
+ * MPU_defines.h
  *
- *  Created on: 08.10.2018
- *  	License: MIT
- *      Author: Mateusz Salamon
- *      Based on:
- *      	 - MPU-6000 and MPU-6050 Product Specification Revision 3.4
- *      	 - MPU-6000 and MPU-6050 Register Map and Descriptions Revision 4.2
- *      	 - i2cdevlib by Jeff Rowberg on MIT license
- *      	 - SparkFun MPU-9250 Digital Motion Processor (DMP) Arduino Library on MIT License
- *
- *		www.msalamon.pl
- *		mateusz@msalamon.pl
- *
- *	Website: https://msalamon.pl/6-stopni-swobody-z-mpu6050-na-stm32/
- *	GitHub: https://github.com/lamik/MPU6050_STM32_HAL
+ *  Created on: Oct 25, 2020
+ *      Author: juliusz
  */
 
-#ifndef MPU6050_H_
-#define MPU6050_H_
-
-#define MPU6050_ADDRESS 0xD1	// AD0 low
-//#define MPU6050_ADDRESS 0xD1	// AD0 high
+#ifndef INC_MPU_DEFINES_H_
+#define INC_MPU_DEFINES_H_
 
 //
 //	Registers addresses
@@ -455,114 +440,5 @@
 #define MPU6050_WHO_AM_I_BIT        6
 #define MPU6050_WHO_AM_I_LENGTH     6
 
-typedef struct all_scaled all_scaled;
 
-struct all_scaled {
-	float x;
-	float y;
-	float z;
-	float rx;
-	float ry;
-	float rz;
-};
-//***********************************//
-//			FUNCTIONS				 //
-//***********************************//
-void MPU6050_Init(I2C_HandleTypeDef *hi2c);
-void MPU6050_Init_Custom(I2C_HandleTypeDef *hi2c);
-uint8_t MPU6050_GetDeviceID();
-
-//
-// SMPRT_DIV
-//
-void MPU6050_SetSmprtDiv (uint8_t Divider);
-
-//
-//	CONFIG
-//
-void MPU6050_SetDlpf(uint8_t Value);
-
-//
-//	PWR_MGMT_1
-//
-void MPU6050_DeviceReset(uint8_t Reset);
-void MPU6050_SetClockSource(uint8_t Source);
-void MPU6050_SetSleepEnabled(uint8_t Enable);
-void MPU6050_SetCycleEnabled(uint8_t Enable);
-void MPU6050_SetTemperatureSensorDisbled(uint8_t Disable);
-
-//
-//	PWR_MGMT_2
-//
-void MPU6050_SetLowPowerWakeUpFrequency(uint8_t Frequency);
-void MPU6050_AccelerometerAxisStandby(uint8_t XA_Stby, uint8_t YA_Stby, uint8_t ZA_Stby);
-void MPU6050_GyroscopeAxisStandby(uint8_t XG_Stby, uint8_t YG_Stby, uint8_t ZG_Stby);
-
-//
-//	Measurement scale configuration
-//
-void MPU6050_SetFullScaleGyroRange(uint8_t Range);
-void MPU6050_SetFullScaleAccelRange(uint8_t Range);
-
-//
-// Reading data
-//
-int16_t MPU6050_GetTemperatureRAW(void);
-float MPU6050_GetTemperatureCelsius(void);
-
-int16_t MPU6050_GetAccelerationXRAW(void);
-int16_t MPU6050_GetAccelerationYRAW(void);
-int16_t MPU6050_GetAccelerationZRAW(void);
-void MPU6050_GetAccelerometerRAW(int16_t* x, int16_t* y, int16_t* z);
-void MPU6050_GetAccelerometerScaled(float* x, float* y, float* z);
-
-int16_t MPU6050_GetRotationXRAW(void);
-int16_t MPU6050_GetRotationYRAW(void);
-int16_t MPU6050_GetRotationZRAW(void);
-void MPU6050_GetGyroscopeRAW(int16_t* x, int16_t* y, int16_t* z);
-void MPU6050_GetGyroscopeScaled(float* x, float* y, float* z);
-
-void MPU6050_GetRollPitch(float* Roll, float* Pitch);
-
-HAL_StatusTypeDef MPU6050_CalibrateGyro(void);
-void MPU6050_RestartInternal(void);
-
-HAL_StatusTypeDef MPU6050_GetAllRAW(int16_t *x, int16_t *y, int16_t *z, int16_t *rx, int16_t *ry, int16_t *rz);
-
-HAL_StatusTypeDef MPU6050_GetAllScaled(all_scaled *result);
-
-//
-//	Setting INT pin
-//
-// INT_PIN_CFG register
-void MPU6050_SetInterruptMode(uint8_t Mode);
-void MPU6050_SetInterruptDrive(uint8_t Drive);
-void MPU6050_SetInterruptLatch(uint8_t Latch);
-void MPU6050_SetInterruptLatchClear(uint8_t Clear);
-// INT_ENABLE register
-void MPU6050_SetIntEnableRegister(uint8_t Value);
-void MPU6050_SetIntDataReadyEnabled(uint8_t Enable);
-// INT_STATUS register
-uint8_t MPU6050_GetIntStatusRegister(void);
-
-//
-//	Motion functions - not included in documentation/register map
-//
-uint8_t MPU6050_GetMotionStatusRegister(void);
-
-void MPU6050_SetDHPFMode(uint8_t Dhpf);
-// INT_ENABLE register
-void MPU6050_SetIntZeroMotionEnabled(uint8_t Enable);
-void MPU6050_SetIntMotionEnabled(uint8_t Enable);
-void MPU6050_SetIntFreeFallEnabled(uint8_t Enable);
-
-void MPU6050_SetMotionDetectionThreshold(uint8_t Threshold);
-void MPU6050_SetMotionDetectionDuration(uint8_t Duration);
-
-void MPU6050_SetZeroMotionDetectionThreshold(uint8_t Threshold);
-void MPU6050_SetZeroMotionDetectionDuration(uint8_t Duration);
-
-void MPU6050_SetFreeFallDetectionThreshold(uint8_t Threshold);
-void MPU6050_SetFreeFallDetectionDuration(uint8_t Duration);
-
-#endif /* MPU6050_H_ */
+#endif /* INC_MPU_DEFINES_H_ */

@@ -36,6 +36,9 @@
 
 
 /*##### MPU.h config #####*/
+#define I2C_TIMEOUT 1
+
+#define CALIBRATION_ROUNDS 2000
 /*########################*/
 
 /*#### event.h config ####*/

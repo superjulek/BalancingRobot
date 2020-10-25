@@ -10,6 +10,7 @@
 #include "stepper.h"
 #include "scheduler.h"
 #include "config.h"
+#include "MPU.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -17,14 +18,13 @@
 /* Imported variables */
 extern float angle;
 extern float target_angle;
-extern float target_position;
 extern PID_t *angle_PID;
 extern PID_t *speed_PID;
 extern uint8_t rbuf[1];
-extern volatile int32_t position;
 extern stepper_t *left_stepper;
 extern stepper_t *right_stepper;
 extern scheduler_t *scheduler;
+extern MPU_t *myMPU;
 extern uint8_t drive_command;
 extern float mount_error;
 extern robot_state_t state;
@@ -43,7 +43,7 @@ event_t flash_LED = {
 
 static void measure_angle_callback(void)
 {
-	angle = get_new_angle(angle);
+	angle = myMPU->get_comp_angle(myMPU);
 }
 
 event_t measure_angle = {
@@ -301,7 +301,6 @@ static void process_rbuf_callback(void)
 		break;
 	case 15:
 		drive_command = STOP;
-		target_position = position;
 		send_string("stop\n");
 		break;
 	case 16:
@@ -351,8 +350,6 @@ static void reset_everything_callback(void)
 
 {
 	target_angle = 0;
-	target_position = 0;
-	position = 0;
 	drive_command = STOP;
 	angle_PID->reset(angle_PID);
 	angle_PID->set_desired_signal(angle_PID, target_angle);
@@ -396,10 +393,11 @@ event_t stop = {
 static void restart_MPU_callback(void)
 {
 	state = PROGRAM_CALIBRATING;
-	MPU6050_RestartInternal();
-	MPU6050_CalibrateGyro();
-	mount_error = MOUNT_ERROR;
-	angle = get_angle_acc();
+	myMPU->reset(myMPU);
+	myMPU->calibrate_gyro(myMPU);
+	angle = myMPU->get_acc_angle(myMPU);
+	myMPU->reset_mount_error(myMPU);
+	myMPU->set_last_angle(myMPU, angle);
 }
 
 event_t restart_MPU = {

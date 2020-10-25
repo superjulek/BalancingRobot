@@ -11,7 +11,6 @@
 
 #include "main.h"
 #include "general.h"
-#include "mpu6050.h"
 
 /*##### TO BE DEFINED #####*/
 /**
