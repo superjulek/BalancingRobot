@@ -325,7 +325,7 @@ void HAL_SYSTICK_Callback(void)
 			scheduler->add_to_queue(scheduler, emergency_check);
 		}
 		/* 2 Hz */
-		if (counter % 500 == 0)
+		if (counter % 200 == 0)
 		{
 			scheduler->add_to_queue(scheduler, send_telemetry);
 		}

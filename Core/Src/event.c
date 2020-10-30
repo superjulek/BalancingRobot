@@ -11,6 +11,7 @@
 #include "scheduler.h"
 #include "config.h"
 #include "MPU.h"
+#include "general.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -30,7 +31,7 @@ extern float mount_error;
 extern robot_state_t state;
 extern int32_t turning_speed_modified;
 extern float driving_speed_modified;
-volatile uint8_t TelemetryBuff [9];
+uint8_t TelemetryBuff [sizeof(telemetry_t) + 1];
 /**/
 
 static void flash_LED_callback(void)
@@ -84,10 +85,16 @@ event_t right_ramp = {
 
 static void send_telemetry_callback(void)
 {
-	TelemetryBuff[0] = 0x2A;
-	memcpy (TelemetryBuff + 1, &target_angle, 4);
-	memcpy (TelemetryBuff + 5, &angle, 4);
-	HAL_UART_Transmit_DMA(&huart1, TelemetryBuff, 9);
+	TelemetryBuff[0] = TELEMETRY_SIGN;
+	telemetry_t current_telemetry = {
+			.TargetAngle = target_angle,
+			.Angle = angle,
+			.TargetSpeed = driving_speed_modified,
+			.Speed = angle_PID->get_output(angle_PID),
+			.Battery = 100.,
+	};
+	memcpy (TelemetryBuff + 1, &current_telemetry, sizeof(telemetry_t));
+	HAL_UART_Transmit_DMA(&huart1, TelemetryBuff, sizeof(telemetry_t) + 1);
 	return;
 	char buff[30];
 	sprintf(buff, "%.2f\t%.2f\t%d\n", angle, target_angle, (int)(angle_PID->get_output(angle_PID) / 1000));
