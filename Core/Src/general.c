@@ -14,8 +14,7 @@ void write_pin (pin_t pin, GPIO_PinState state)
 }
 
 void send_string (char *string){
-	HAL_UART_Transmit(&huart1, string, strlen(string), 2);
-	//HAL_UART_Transmit_DMA(&huart1, string, strlen(string));
+	HAL_UART_Transmit_DMA(&huart1, string, strlen(string));
 }
 
 uint16_t hash_string (char *string){

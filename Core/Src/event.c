@@ -30,6 +30,7 @@ extern float mount_error;
 extern robot_state_t state;
 extern int32_t turning_speed_modified;
 extern float driving_speed_modified;
+volatile uint8_t TelemetryBuff [9];
 /**/
 
 static void flash_LED_callback(void)
@@ -83,6 +84,11 @@ event_t right_ramp = {
 
 static void send_telemetry_callback(void)
 {
+	TelemetryBuff[0] = 0x2A;
+	memcpy (TelemetryBuff + 1, &target_angle, 4);
+	memcpy (TelemetryBuff + 5, &angle, 4);
+	HAL_UART_Transmit_DMA(&huart1, TelemetryBuff, 9);
+	return;
 	char buff[30];
 	sprintf(buff, "%.2f\t%.2f\t%d\n", angle, target_angle, (int)(angle_PID->get_output(angle_PID) / 1000));
 	send_string(buff);
