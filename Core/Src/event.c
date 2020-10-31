@@ -12,6 +12,7 @@
 #include "config.h"
 #include "MPU.h"
 #include "general.h"
+#include "bluetooth_communicator.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -21,17 +22,16 @@ extern float angle;
 extern float target_angle;
 extern PID_t *angle_PID;
 extern PID_t *speed_PID;
-extern uint8_t rbuf[1];
+extern uint8_t RxBuff[RECEIVED_BUFFER_SIZE];
 extern stepper_t *left_stepper;
 extern stepper_t *right_stepper;
 extern scheduler_t *scheduler;
 extern MPU_t *myMPU;
-extern uint8_t drive_command;
+extern drive_command_t drive_command;
 extern float mount_error;
 extern robot_state_t state;
 extern int32_t turning_speed_modified;
 extern float driving_speed_modified;
-uint8_t TelemetryBuff [sizeof(telemetry_t) + 1];
 /**/
 
 static void flash_LED_callback(void)
@@ -85,7 +85,6 @@ event_t right_ramp = {
 
 static void send_telemetry_callback(void)
 {
-	TelemetryBuff[0] = TELEMETRY_SIGN;
 	telemetry_t current_telemetry = {
 			.TargetAngle = target_angle,
 			.Angle = angle,
@@ -93,12 +92,8 @@ static void send_telemetry_callback(void)
 			.Speed = angle_PID->get_output(angle_PID),
 			.Battery = 100.,
 	};
-	memcpy (TelemetryBuff + 1, &current_telemetry, sizeof(telemetry_t));
-	HAL_UART_Transmit_DMA(&huart1, TelemetryBuff, sizeof(telemetry_t) + 1);
+	bt_send_telemetry(&huart1, current_telemetry);
 	return;
-	char buff[30];
-	sprintf(buff, "%.2f\t%.2f\t%d\n", angle, target_angle, (int)(angle_PID->get_output(angle_PID) / 1000));
-	send_string(buff);
 }
 
 event_t send_telemetry = {
@@ -110,9 +105,9 @@ static void angle_PID_tic_callback(void)
 	angle_PID->tic(angle_PID, angle);
 	int32_t speed = (int32_t)angle_PID->get_output_smooth(angle_PID);
 	int32_t turning = 0;
-	if (drive_command == 3)
+	if (drive_command == LEFT)
 		turning = turning_speed_modified;
-	if (drive_command == 4)
+	if (drive_command == RIGHT)
 		turning = -turning_speed_modified;
 	left_stepper->set_speed(left_stepper, speed - turning);
 	right_stepper->set_speed(right_stepper, speed + turning);
@@ -175,7 +170,10 @@ event_t restart = {
 
 static void process_rbuf_callback(void)
 {
+	bt_process_received_buffer(&huart1, RxBuff);
+	return;
 	static bool tuning_angle = TRUE; //FALSE - tuning speed
+	uint8_t rbuf[1] = {255};
 	switch (rbuf[0])
 	{
 	case 0:

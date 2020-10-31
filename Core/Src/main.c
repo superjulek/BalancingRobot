@@ -33,6 +33,7 @@
 #include "general.h"
 #include "MPU.h"
 #include "config.h"
+#include "bluetooth_communicator.h"
 
 /* USER CODE END Includes */
 
@@ -116,8 +117,8 @@ pin_t MPU_power_pin = (pin_t){
 float angle;
 float target_angle = 0.;
 float mount_error = MOUNT_ERROR;
-uint8_t rbuf[1];
-uint8_t drive_command = 0;
+uint8_t RxBuff[RECEIVED_BUFFER_SIZE];
+drive_command_t drive_command = STOP;
 volatile robot_state_t state = PROGRAM_CALIBRATING;
 int32_t turning_speed_modified = TURNING_SPEED;
 float driving_speed_modified = DRIVING_SPEED;
@@ -196,7 +197,7 @@ int main(void)
 	angle = myMPU->get_acc_angle(myMPU);
 	myMPU->set_last_angle(myMPU, angle);
 	HAL_TIM_Base_Start_IT(&htim1);
-	HAL_UART_Receive_DMA(&huart1, rbuf, 1);
+	HAL_UART_Receive_DMA(&huart1, RxBuff, RECEIVED_BUFFER_SIZE);
 	scheduler->add_to_queue(scheduler, begin_waiting);
   /* USER CODE END 2 */
 
@@ -325,7 +326,7 @@ void HAL_SYSTICK_Callback(void)
 			scheduler->add_to_queue(scheduler, emergency_check);
 		}
 		/* 2 Hz */
-		if (counter % 200 == 0)
+		if (counter % 100 == 0)
 		{
 			scheduler->add_to_queue(scheduler, send_telemetry);
 		}
@@ -348,7 +349,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	scheduler->add_to_queue(scheduler, process_rbuf);
-	HAL_UART_Receive_DMA(&huart1, rbuf, 1);
+	HAL_UART_Receive_DMA(&huart1, RxBuff, RECEIVED_BUFFER_SIZE);
 }
 
 /* USER CODE END 4 */

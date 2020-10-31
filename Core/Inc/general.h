@@ -13,24 +13,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TELEMETRY_SIGN 0x2A
-
 typedef struct pin_t pin_t;
-typedef struct telemetry_t telemetry_t;
 
 typedef enum robot_state_t robot_state_t;
 
 struct pin_t {
 	GPIO_TypeDef *pin_port;
 	uint16_t pin;
-};
-
-struct telemetry_t {
-	float TargetAngle;
-	float Angle;
-	float TargetSpeed;
-	float Speed;
-	float Battery;
 };
 
 enum robot_state_t {
