@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "dma.h"
 #include "i2c.h"
 #include "tim.h"
@@ -118,6 +119,7 @@ float angle;
 float target_angle = 0.;
 float mount_error = MOUNT_ERROR;
 uint8_t RxBuff[RECEIVED_BUFFER_SIZE];
+uint32_t batt_vol;
 drive_command_t drive_command = STOP;
 volatile robot_state_t state = PROGRAM_CALIBRATING;
 int32_t turning_speed_modified = TURNING_SPEED;
@@ -128,8 +130,6 @@ stepper_t *left_stepper;
 stepper_t *right_stepper;
 scheduler_t *scheduler;
 MPU_t *myMPU;
-
-extern int16_t gyro_cali_x, gyro_cali_y, gyro_cali_z;
 
 /* USER CODE END PV */
 
@@ -182,6 +182,7 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   MX_TIM5_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 	left_stepper->set_microstepping(left_stepper, STEPS_128);
 	right_stepper->set_microstepping(right_stepper, STEPS_128);
@@ -198,6 +199,7 @@ int main(void)
 	myMPU->set_last_angle(myMPU, angle);
 	HAL_TIM_Base_Start_IT(&htim1);
 	HAL_UART_Receive_DMA(&huart1, RxBuff, RECEIVED_BUFFER_SIZE);
+	HAL_ADC_Start_DMA(&hadc1, &batt_vol, 1);
 	scheduler->add_to_queue(scheduler, begin_waiting);
   /* USER CODE END 2 */
 

@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define L_ENABLE_GPIO_Port GPIOC
 #define R_ENABLE_Pin GPIO_PIN_2
 #define R_ENABLE_GPIO_Port GPIOC
+#define BAT_VOL_Pin GPIO_PIN_3
+#define BAT_VOL_GPIO_Port GPIOC
 #define L_MS3_Pin GPIO_PIN_1
 #define L_MS3_GPIO_Port GPIOA
 #define L_MS2_Pin GPIO_PIN_4

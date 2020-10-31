@@ -32,6 +32,7 @@ extern float mount_error;
 extern robot_state_t state;
 extern int32_t turning_speed_modified;
 extern float driving_speed_modified;
+extern uint32_t batt_vol;
 /**/
 
 static void flash_LED_callback(void)
@@ -90,7 +91,7 @@ static void send_telemetry_callback(void)
 			.Angle = angle,
 			.TargetSpeed = driving_speed_modified,
 			.Speed = angle_PID->get_output(angle_PID),
-			.Battery = 100.,
+			.Battery = ((float)batt_vol * 0.001548 - 3) / (4.2 - 3),
 	};
 	bt_send_telemetry(&huart1, current_telemetry);
 	return;
