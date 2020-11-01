@@ -124,10 +124,10 @@ drive_command_t drive_command = STOP;
 volatile robot_state_t state = PROGRAM_CALIBRATING;
 
 float manual_turning_speed = TURNING_SPEED;
-float joystick_max_turning_speed = TURNING_SPEED;
+float joystick_max_turning_speed = TURNING_SPEED * 2;
 
 float manual_driving_speed = DRIVING_SPEED;
-float joystick_max_driving_speed = DRIVING_SPEED;
+float joystick_max_driving_speed = DRIVING_SPEED * 2;
 
 PID_t *angle_PID;
 PID_t *speed_PID;
