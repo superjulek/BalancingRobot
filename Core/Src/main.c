@@ -100,8 +100,8 @@ stepper_pins_t right_stepper_pins = {
 	},
 };
 PID_coefs_t angle_PID_coefs = {
-	.KP_coef = 7800,
-	.KI_coef = 180000,
+	.KP_coef = 25000,
+	.KI_coef = 190000,
 	.KD_coef = 110,
 };
 PID_coefs_t speed_PID_coefs = {
@@ -122,8 +122,13 @@ uint8_t RxBuff[RECEIVED_BUFFER_SIZE];
 uint32_t batt_vol;
 drive_command_t drive_command = STOP;
 volatile robot_state_t state = PROGRAM_CALIBRATING;
-int32_t turning_speed_modified = TURNING_SPEED;
-float driving_speed_modified = DRIVING_SPEED;
+
+float manual_turning_speed = TURNING_SPEED;
+float joystick_max_turning_speed = TURNING_SPEED;
+
+float manual_driving_speed = DRIVING_SPEED;
+float joystick_max_driving_speed = DRIVING_SPEED;
+
 PID_t *angle_PID;
 PID_t *speed_PID;
 stepper_t *left_stepper;

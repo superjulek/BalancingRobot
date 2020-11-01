@@ -30,8 +30,10 @@ extern MPU_t *myMPU;
 extern drive_command_t drive_command;
 extern float mount_error;
 extern robot_state_t state;
-extern int32_t turning_speed_modified;
-extern float driving_speed_modified;
+extern float manual_turning_speed;
+extern float joystick_max_turning_speed;
+extern float manual_driving_speed;
+extern float joystick_max_driving_speed;
 extern uint32_t batt_vol;
 /**/
 
@@ -89,7 +91,7 @@ static void send_telemetry_callback(void)
 	telemetry_t current_telemetry = {
 			.TargetAngle = target_angle,
 			.Angle = angle,
-			.TargetSpeed = driving_speed_modified,
+			.TargetSpeed = manual_driving_speed,
 			.Speed = angle_PID->get_output(angle_PID),
 			.Battery = ((float)batt_vol * 0.001548 - 3) / (4.2 - 3),
 	};
@@ -107,9 +109,9 @@ static void angle_PID_tic_callback(void)
 	int32_t speed = (int32_t)angle_PID->get_output_smooth(angle_PID);
 	int32_t turning = 0;
 	if (drive_command == LEFT)
-		turning = turning_speed_modified;
+		turning = (int32_t)manual_turning_speed;
 	if (drive_command == RIGHT)
-		turning = -turning_speed_modified;
+		turning = (int32_t) (-manual_turning_speed);
 	left_stepper->set_speed(left_stepper, speed - turning);
 	right_stepper->set_speed(right_stepper, speed + turning);
 }
@@ -257,41 +259,41 @@ static void process_rbuf_callback(void)
 		}
 	case 9:
 	{
-		driving_speed_modified *= 1.05;
+		manual_driving_speed *= 1.05;
 		if (drive_command == FORWARD)
 		{
-			speed_PID->set_desired_signal(speed_PID, driving_speed_modified);
+			speed_PID->set_desired_signal(speed_PID, manual_driving_speed);
 		}
 		if (drive_command == BACKWARD)
 		{
-			speed_PID->set_desired_signal(speed_PID, -driving_speed_modified);
+			speed_PID->set_desired_signal(speed_PID, -manual_driving_speed);
 		}
 		char buff[15];
-		sprintf(buff, "VP = %.0f\n", driving_speed_modified);
+		sprintf(buff, "VP = %.0f\n", manual_driving_speed);
 		send_string(buff);
 		break;
 	}
 	case 12:
 	{
-		driving_speed_modified *= 0.95;
+		manual_driving_speed *= 0.95;
 		if (drive_command == FORWARD)
 		{
-			speed_PID->set_desired_signal(speed_PID, driving_speed_modified);
+			speed_PID->set_desired_signal(speed_PID, manual_driving_speed);
 		}
 		if (drive_command == BACKWARD)
 		{
-			speed_PID->set_desired_signal(speed_PID, -driving_speed_modified);
+			speed_PID->set_desired_signal(speed_PID, -manual_driving_speed);
 		}
 		char buff[15];
-		sprintf(buff, "VP = %.0f\n", driving_speed_modified);
+		sprintf(buff, "VP = %.0f\n", manual_driving_speed);
 		send_string(buff);
 		break;
 	}
 	case 13:
 	{
-		turning_speed_modified *= 1.05;
+		manual_turning_speed *= 1.05;
 		char buff[15];
-		sprintf(buff, "VT = %ld\n", turning_speed_modified);
+		sprintf(buff, "VT = %f\n", manual_turning_speed);
 		send_string(buff);
 		break;
 	}
@@ -300,9 +302,9 @@ static void process_rbuf_callback(void)
 		send_string((tuning_angle ? "Tuning angle PID\n" : " Tuning speed PID\n"));
 	case 10:
 	{
-		turning_speed_modified *= 0.95;
+		manual_turning_speed *= 0.95;
 		char buff[15];
-		sprintf(buff, "VT = %ld\n", turning_speed_modified);
+		sprintf(buff, "VT = %f\n", manual_turning_speed);
 		send_string(buff);
 		break;
 	}
@@ -318,13 +320,13 @@ static void process_rbuf_callback(void)
 	case 16:
 		drive_command = FORWARD;
 		speed_PID->reset(speed_PID);
-		speed_PID->set_desired_signal(speed_PID, driving_speed_modified);
+		speed_PID->set_desired_signal(speed_PID, manual_driving_speed);
 		send_string("fwd\n");
 		break;
 	case 17:
 		drive_command = BACKWARD;
 		speed_PID->reset(speed_PID);
-		speed_PID->set_desired_signal(speed_PID, -driving_speed_modified);
+		speed_PID->set_desired_signal(speed_PID, -manual_driving_speed);
 		send_string("bwd\n");
 		break;
 	case 18:

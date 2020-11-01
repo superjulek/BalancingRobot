@@ -21,6 +21,10 @@
 #define RESTART_SIGN                0x04
 #define SET_ANGLE_PID_COEFS_SIGN    0x05
 #define SET_SPEED_PID_COEFS_SIGN    0x06
+#define GET_MANUAL_SPEED            0x07
+#define GET_JOYSTICK_SPEED          0x08
+#define SET_MANUAL_SPEED            0x09
+#define SET_JOYSTICK_SPEED          0x0A
 
 
 extern PID_t *angle_PID;
