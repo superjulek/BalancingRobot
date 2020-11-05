@@ -93,7 +93,7 @@ static void send_telemetry_callback(void)
 		.TargetAngle = target_angle,
 		.Angle = angle,
 		.TargetSpeed = manual_driving_speed, // jw
-		.Speed = (float)((left_stepper->get_actual_speed(left_stepper) + right_stepper->get_actual_speed(right_stepper))/2),
+		.Speed = (float)((left_stepper->get_actual_speed(left_stepper) + right_stepper->get_actual_speed(right_stepper)) / 2),
 		.Battery = ((float)batt_vol * 0.001548 - 3) / (4.2 - 3),
 	};
 	bt_send_telemetry(&huart1, current_telemetry);
@@ -113,7 +113,7 @@ static void angle_PID_tic_callback(void)
 		left_stepper->set_speed(left_stepper, speed - (int32_t)set_turining_speed);
 		right_stepper->set_speed(right_stepper, speed + (int32_t)set_turining_speed);
 	}
-	else if (drive_command == RIGHT)
+	else if (drive_command == RIGHT || drive_command == JOYSTICK_SPEED)
 	{
 		left_stepper->set_speed(left_stepper, speed + (int32_t)set_turining_speed);
 		right_stepper->set_speed(right_stepper, speed - (int32_t)set_turining_speed);
@@ -153,11 +153,17 @@ static void movement_control_tic_callback(void)
 			target_angle -= MOUNT_ANGLE_CORECTION * angle;
 		}
 		break;
+	case STOP:
+		if (abs(output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT)
+		{
+			mount_error += MOUNT_ANGLE_CORECTION * angle;
+			target_angle -= MOUNT_ANGLE_CORECTION * angle;
+		}
 	case FORWARD:
 	case BACKWARD:
-	case STOP:
 	case LEFT:
 	case RIGHT:
+	case JOYSTICK_SPEED:
 		speed_PID->tic(speed_PID, averaged_output);
 		target_angle = -speed_PID->get_output_smooth(speed_PID) / 1000.;
 		break;

@@ -159,8 +159,8 @@ int main(void)
 	/* USER CODE BEGIN 1 */
 	left_stepper = stepper_create(left_stepper_pins, TRUE, &htim5, TIM_CHANNEL_1);
 	right_stepper = stepper_create(right_stepper_pins, FALSE, &htim2, TIM_CHANNEL_1);
-	angle_PID = PID_create(angle_PID_coefs, 300, MAX_SPEED, 250, 0.1);
-	speed_PID = PID_create(speed_PID_coefs, 200, 1800., 250, 0.99);
+	angle_PID = PID_create(angle_PID_coefs, 1000, MAX_SPEED, 250, 0.1);
+	speed_PID = PID_create(speed_PID_coefs, 50, 3500., 250, 0.99);
 	scheduler = scheduler_create();
 	/* USER CODE END 1 */
 
