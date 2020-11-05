@@ -16,6 +16,7 @@
 typedef struct pin_t pin_t;
 
 typedef enum robot_state_t robot_state_t;
+typedef enum drive_command_t drive_command_t;
 
 struct pin_t {
 	GPIO_TypeDef *pin_port;
@@ -27,6 +28,17 @@ enum robot_state_t {
 	STOPPED,
 	WAITING_FOR_LAUNCH,
 	LAUNCHED,
+};
+
+enum drive_command_t {
+	STOP,
+	FORWARD,
+	BACKWARD,
+	LEFT,
+	RIGHT,
+	ANGLE_CALIBRATING,
+	JOYSTICK_SPEED,
+	VELOCITY_BRAKE ,
 };
 
 void write_pin (pin_t pin, GPIO_PinState state);

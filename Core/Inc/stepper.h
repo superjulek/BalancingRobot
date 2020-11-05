@@ -38,7 +38,6 @@
 typedef enum microstepping_t microstepping_t;
 typedef struct stepper_pins_t stepper_pins_t;
 typedef struct stepper_t stepper_t;
-typedef enum drive_command_t drive_command_t;
 
 enum microstepping_t {
 	STEPS_FULL = 1,
@@ -49,15 +48,6 @@ enum microstepping_t {
 	STEPS_32 = 32,
 	STEPS_64 = 64,
 	STEPS_128 = 128,
-};
-
-enum drive_command_t {
-	STOP = 0,
-	FORWARD = 1,
-	BACKWARD = 2,
-	LEFT = 3,
-	RIGHT = 4,
-	VELOCITY_BRAKE = 5,
 };
 
 #ifdef DRV8825

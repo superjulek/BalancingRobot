@@ -7,6 +7,8 @@
 
 #include "general.h"
 
+#define MAX_TMP_BUFF 20
+char tmp_buff[MAX_TMP_BUFF];
 
 void write_pin (pin_t pin, GPIO_PinState state)
 {
@@ -14,5 +16,7 @@ void write_pin (pin_t pin, GPIO_PinState state)
 }
 
 void send_string (char *string){
+	if (strlen(string) > MAX_TMP_BUFF) return; //too long to store
+	memcpy(tmp_buff, string, strlen(string));
 	HAL_UART_Transmit_DMA(&huart1, string, strlen(string));
 }

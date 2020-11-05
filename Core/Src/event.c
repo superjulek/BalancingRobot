@@ -89,9 +89,9 @@ event_t right_ramp = {
 static void send_telemetry_callback(void)
 {
 	telemetry_t current_telemetry = {
-			.TargetAngle = target_angle,
+			.TargetAngle = target_angle, // TODO: pobierac z PID
 			.Angle = angle,
-			.TargetSpeed = manual_driving_speed,
+			.TargetSpeed = manual_driving_speed, // jw
 			.Speed = angle_PID->get_output(angle_PID),
 			.Battery = ((float)batt_vol * 0.001548 - 3) / (4.2 - 3),
 	};
@@ -130,7 +130,7 @@ static void movement_control_tic_callback(void)
 	{
 	case LEFT:
 	case RIGHT:
-	case STOP:
+	case ANGLE_CALIBRATING:
 		if ((target_angle > -MAX_ANGLE_STANDING) && (output > MAX_STANDING_SPEED))
 		{
 			target_angle -= ANGLE_CORRECTION;
@@ -148,7 +148,7 @@ static void movement_control_tic_callback(void)
 		break;
 	case FORWARD:
 	case BACKWARD:
-	case VELOCITY_BRAKE:
+	case STOP:
 		speed_PID->tic(speed_PID, averaged_output);
 		target_angle = -speed_PID->get_output_smooth(speed_PID) / 1000.;
 		break;
