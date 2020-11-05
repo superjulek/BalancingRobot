@@ -125,6 +125,11 @@ struct stepper_t {
 	 * Stop stepper operation
 	 */
 	void (*stop) (stepper_t *public);
+
+	/**
+	 * Get actual speed, e.g. for telemetry
+	 */
+	int32_t (*get_actual_speed) (stepper_t *public);
 };
 
 /**

@@ -10,8 +10,10 @@
 #include "event.h"
 #include "scheduler.h"
 #include "general.h"
+#include "config.h"
 
 /* Communication signs - robot -> controller */
+/* 7th bit for state */
 #define TELEMETRY_SIGN 0b10000001
 #define ANGLE_PID_COEFS_SIGN 0b10000010
 #define SPEED_PID_COEFS_SIGN 0b10000011
@@ -19,24 +21,24 @@
 #define JOYSTICK_SPEEDS_SIGN 0b10000101
 
 /* Communication signs - controller -> robot */
-#define GET_ANGLE_PID_COEFS_SIGN    0x00
-#define GET_SPEED_PID_COEFS_SIGN    0x01
-#define STOP_ROBOT                  0x02
-#define RESTART_ROBOT               0x03
-#define START_ROBOT                 0x04
-#define SET_ANGLE_PID_COEFS_SIGN    0x05
-#define SET_SPEED_PID_COEFS_SIGN    0x06
-#define GET_MANUAL_SPEED            0x07
-#define GET_JOYSTICK_SPEED          0x08
-#define SET_MANUAL_SPEED            0x09
-#define SET_JOYSTICK_SPEED          0x0A
-#define SET_MANUAL_STOP             0x0B
-#define SET_MANUAL_FWD              0x0C
-#define SET_MANUAL_BWD              0x0D
-#define SET_MANUAL_LEFT             0x0E
-#define SET_MANUAL_RIGHT            0x0F
-#define SET_JOYSTICK_CONTROL        0x10
-#define SET_ANGLE_CALIBRATION       0x11
+#define GET_ANGLE_PID_COEFS_SIGN 0x00
+#define GET_SPEED_PID_COEFS_SIGN 0x01
+#define STOP_ROBOT 0x02
+#define RESTART_ROBOT 0x03
+#define START_ROBOT 0x04
+#define SET_ANGLE_PID_COEFS_SIGN 0x05
+#define SET_SPEED_PID_COEFS_SIGN 0x06
+#define GET_MANUAL_SPEED 0x07
+#define GET_JOYSTICK_SPEED 0x08
+#define SET_MANUAL_SPEED 0x09
+#define SET_JOYSTICK_SPEED 0x0A
+#define SET_MANUAL_STOP 0x0B
+#define SET_MANUAL_FWD 0x0C
+#define SET_MANUAL_BWD 0x0D
+#define SET_MANUAL_LEFT 0x0E
+#define SET_MANUAL_RIGHT 0x0F
+#define SET_JOYSTICK_CONTROL 0x10
+#define SET_ANGLE_CALIBRATION 0x11
 
 typedef struct speeds_t speeds_t;
 
@@ -55,6 +57,7 @@ extern float joystick_max_driving_speed;
 extern scheduler_t *scheduler;
 extern robot_state_t state;
 extern drive_command_t drive_command;
+extern float set_turining_speed;
 
 uint8_t TelemetryBuff[sizeof(telemetry_t) + 1];
 uint8_t PIDConfBuff[sizeof(PID_coefs_t) + 1];
@@ -63,6 +66,8 @@ uint8_t SpeedsBuff[sizeof(speeds_t) + 1];
 void bt_send_telemetry(UART_HandleTypeDef *huart, telemetry_t telemetry)
 {
     TelemetryBuff[0] = TELEMETRY_SIGN;
+    if (state == LAUNCHED)
+        TelemetryBuff[0] |= 0b01000000;
     memcpy(TelemetryBuff + 1, &telemetry, sizeof(telemetry_t));
     HAL_UART_Transmit_DMA(huart, TelemetryBuff, sizeof(telemetry_t) + 1);
     return;
@@ -99,7 +104,6 @@ void bt_set_manual_stop()
     if (drive_command != STOP)
     {
         drive_command = STOP;
-        speed_PID->reset(speed_PID);
         speed_PID->set_desired_signal(speed_PID, 0);
         send_string("stopping");
     }
@@ -110,9 +114,8 @@ void bt_set_manual_fwd()
     if (drive_command != FORWARD)
     {
         drive_command = FORWARD;
-		speed_PID->reset(speed_PID);
-		speed_PID->set_desired_signal(speed_PID, manual_driving_speed);
-		send_string("going fwd\n");
+        speed_PID->set_desired_signal(speed_PID, manual_driving_speed);
+        send_string("going fwd\n");
     }
 }
 
@@ -121,25 +124,38 @@ void bt_set_manual_bwd()
     if (drive_command != BACKWARD)
     {
         drive_command = BACKWARD;
-		speed_PID->reset(speed_PID);
-		speed_PID->set_desired_signal(speed_PID, -manual_driving_speed);
-		send_string("going bwd\n");
+        speed_PID->set_desired_signal(speed_PID, -manual_driving_speed);
+        send_string("going bwd\n");
     }
 }
 
 void bt_set_manual_left()
 {
-    drive_command = LEFT;
+    if (drive_command != LEFT)
+    {
+        drive_command = LEFT;
+        set_turining_speed = manual_turning_speed;
+        speed_PID->set_desired_signal(speed_PID, 0);
+    }
 }
 
 void bt_set_manual_right()
 {
-    drive_command = RIGHT;
+    if (drive_command != RIGHT)
+    {
+        drive_command = RIGHT;
+        set_turining_speed = manual_turning_speed;
+        speed_PID->set_desired_signal(speed_PID, 0);
+    }
 }
 
-void bt_set_joystick_control()
+void bt_set_joystick_control(buffer)
 {
     drive_command = JOYSTICK_SPEED;
+    speeds_t new_speeds;
+    memcpy(&new_speeds, buffer + 4, sizeof(speeds_t));
+    set_turining_speed = new_speeds.turning_speed * joystick_max_turning_speed;
+    speed_PID->set_desired_signal(speed_PID, new_speeds.driving_speed * joystick_max_driving_speed);
 }
 
 void bt_set_angle_calibration()
@@ -199,6 +215,14 @@ void bt_set_manual_speeds(uint8_t *buffer)
 {
     speeds_t speeds;
     memcpy(&speeds, buffer + 4, sizeof(speeds_t));
+    if (speeds.driving_speed > MAX_DRIVING_SPEED)
+        speeds.driving_speed = (float)MAX_DRIVING_SPEED;
+    if (speeds.driving_speed < 0)
+        speeds.driving_speed = 0;
+    if (speeds.turning_speed > MAX_DRIVING_SPEED)
+        speeds.turning_speed = (float)MAX_TURNING_SPEED;
+    if (speeds.turning_speed < 0)
+        speeds.turning_speed = 0;
     manual_driving_speed = speeds.driving_speed;
     manual_turning_speed = speeds.turning_speed;
 }
@@ -207,6 +231,14 @@ void bt_set_joystick_speeds(uint8_t *buffer)
 {
     speeds_t speeds;
     memcpy(&speeds, buffer + 4, sizeof(speeds_t));
+    if (speeds.driving_speed > MAX_DRIVING_SPEED)
+        speeds.driving_speed = (float)MAX_DRIVING_SPEED;
+    if (speeds.driving_speed < 0)
+        speeds.driving_speed = 0;
+    if (speeds.turning_speed > MAX_DRIVING_SPEED)
+        speeds.turning_speed = (float)MAX_TURNING_SPEED;
+    if (speeds.turning_speed < 0)
+        speeds.turning_speed = 0;
     joystick_max_driving_speed = speeds.driving_speed;
     joystick_max_turning_speed = speeds.turning_speed;
 }
@@ -299,7 +331,7 @@ void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer)
     }
     case SET_JOYSTICK_CONTROL:
     {
-        bt_set_joystick_control();
+        bt_set_joystick_control(buffer);
         break;
     }
     case SET_ANGLE_CALIBRATION:

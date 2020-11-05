@@ -18,8 +18,10 @@
 
 #define MAX_ANGLE 7
 
+#define MAX_TURNING_SPEED 150000
 #define TURNING_SPEED 25000
 
+#define MAX_DRIVING_SPEED 500000
 #define DRIVING_SPEED 40000
 /*########################*/
 
@@ -60,7 +62,7 @@
 
 #define STEPS_PER_REVOLUTION 200
 
-#define MAX_SPEED 400000
+#define MAX_SPEED 800000
 
 #define MAX_STEPPING_INTERVAL 4000
 /*########################*/

@@ -166,6 +166,12 @@ static void stop(stepper_t *public)
 	HAL_TIM_OC_Stop(this->timer, this->channel);
 }
 
+static int32_t get_actual_speed(stepper_t *public)
+{
+	private_stepper_t *this = (private_stepper_t *)public;
+	return this->actual_speed;
+}
+
 stepper_t *stepper_create(stepper_pins_t pins, bool reverse_direction, TIM_HandleTypeDef *timer, uint32_t channel)
 {
 	private_stepper_t *this = malloc(sizeof(private_stepper_t));
@@ -176,6 +182,7 @@ stepper_t *stepper_create(stepper_pins_t pins, bool reverse_direction, TIM_Handl
 			.set_speed = set_speed,
 			.ramp = ramp,
 			.stop = stop,
+			.get_actual_speed = get_actual_speed,
 		},
 		.pins = pins,
 		.active = 0,

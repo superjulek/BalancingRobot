@@ -35,6 +35,7 @@ extern float joystick_max_turning_speed;
 extern float manual_driving_speed;
 extern float joystick_max_driving_speed;
 extern uint32_t batt_vol;
+extern float set_turining_speed;
 /**/
 
 static void flash_LED_callback(void)
@@ -89,11 +90,11 @@ event_t right_ramp = {
 static void send_telemetry_callback(void)
 {
 	telemetry_t current_telemetry = {
-			.TargetAngle = target_angle, // TODO: pobierac z PID
-			.Angle = angle,
-			.TargetSpeed = manual_driving_speed, // jw
-			.Speed = angle_PID->get_output(angle_PID),
-			.Battery = ((float)batt_vol * 0.001548 - 3) / (4.2 - 3),
+		.TargetAngle = target_angle,
+		.Angle = angle,
+		.TargetSpeed = manual_driving_speed, // jw
+		.Speed = (float)((left_stepper->get_actual_speed(left_stepper) + right_stepper->get_actual_speed(right_stepper))/2),
+		.Battery = ((float)batt_vol * 0.001548 - 3) / (4.2 - 3),
 	};
 	bt_send_telemetry(&huart1, current_telemetry);
 	return;
@@ -107,13 +108,21 @@ static void angle_PID_tic_callback(void)
 {
 	angle_PID->tic(angle_PID, angle);
 	int32_t speed = (int32_t)angle_PID->get_output_smooth(angle_PID);
-	int32_t turning = 0;
 	if (drive_command == LEFT)
-		turning = (int32_t)manual_turning_speed;
-	if (drive_command == RIGHT)
-		turning = (int32_t) (-manual_turning_speed);
-	left_stepper->set_speed(left_stepper, speed - turning);
-	right_stepper->set_speed(right_stepper, speed + turning);
+	{
+		left_stepper->set_speed(left_stepper, speed - (int32_t)set_turining_speed);
+		right_stepper->set_speed(right_stepper, speed + (int32_t)set_turining_speed);
+	}
+	else if (drive_command == RIGHT)
+	{
+		left_stepper->set_speed(left_stepper, speed + (int32_t)set_turining_speed);
+		right_stepper->set_speed(right_stepper, speed - (int32_t)set_turining_speed);
+	}
+	else
+	{
+		left_stepper->set_speed(left_stepper, speed);
+		right_stepper->set_speed(right_stepper, speed);
+	}
 }
 
 event_t angle_PID_tic = {
@@ -128,8 +137,6 @@ static void movement_control_tic_callback(void)
 	averaged_output = averaged_output * 0.05 + output * 0.95;
 	switch (drive_command)
 	{
-	case LEFT:
-	case RIGHT:
 	case ANGLE_CALIBRATING:
 		if ((target_angle > -MAX_ANGLE_STANDING) && (output > MAX_STANDING_SPEED))
 		{
@@ -149,6 +156,8 @@ static void movement_control_tic_callback(void)
 	case FORWARD:
 	case BACKWARD:
 	case STOP:
+	case LEFT:
+	case RIGHT:
 		speed_PID->tic(speed_PID, averaged_output);
 		target_angle = -speed_PID->get_output_smooth(speed_PID) / 1000.;
 		break;
@@ -377,6 +386,8 @@ static void launch_callback(void)
 	send_string("START\n");
 	left_stepper->start(left_stepper);
 	right_stepper->start(right_stepper);
+	angle_PID->reset(angle_PID);
+	speed_PID->reset(speed_PID);
 	state = LAUNCHED;
 }
 

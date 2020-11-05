@@ -105,9 +105,9 @@ PID_coefs_t angle_PID_coefs = {
 	.KD_coef = 110,
 };
 PID_coefs_t speed_PID_coefs = {
-	.KP_coef = 0.005,
-	.KI_coef = 0.065,
-	.KD_coef = 0.000007,
+	.KP_coef = 0.019,
+	.KI_coef = 0.105,
+	.KD_coef = 0.000006,
 };
 pin_t MPU_power_pin = (pin_t){
 	.pin_port = MPU_POWER_GPIO_Port,
@@ -119,12 +119,13 @@ float angle;
 float target_angle = 0.;
 float mount_error = MOUNT_ERROR;
 uint8_t RxBuff[RECEIVED_BUFFER_SIZE];
-uint32_t batt_vol;
+uint32_t batt_vol = 0;
 drive_command_t drive_command = STOP;
 volatile robot_state_t state = PROGRAM_CALIBRATING;
 
 float manual_turning_speed = TURNING_SPEED;
 float joystick_max_turning_speed = TURNING_SPEED * 2;
+float set_turining_speed = 0.0;
 
 float manual_driving_speed = DRIVING_SPEED;
 float joystick_max_driving_speed = DRIVING_SPEED * 2;
