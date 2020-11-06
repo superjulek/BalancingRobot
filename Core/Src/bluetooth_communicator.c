@@ -38,7 +38,6 @@
 #define SET_MANUAL_LEFT 0x0E
 #define SET_MANUAL_RIGHT 0x0F
 #define SET_JOYSTICK_CONTROL 0x10
-#define SET_ANGLE_CALIBRATION 0x11
 
 typedef struct speeds_t speeds_t;
 
@@ -156,15 +155,6 @@ void bt_set_joystick_control(buffer)
     memcpy(&new_speeds, buffer + 4, sizeof(speeds_t));
     set_turining_speed = new_speeds.turning_speed * joystick_max_turning_speed;
     speed_PID->set_desired_signal(speed_PID, new_speeds.driving_speed * joystick_max_driving_speed);
-}
-
-void bt_set_angle_calibration()
-{
-    if (drive_command != ANGLE_CALIBRATING)
-    {
-        drive_command = ANGLE_CALIBRATING;
-        send_string("Angle calibration");
-    }
 }
 
 void bt_start_robot()
@@ -332,11 +322,6 @@ void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer)
     case SET_JOYSTICK_CONTROL:
     {
         bt_set_joystick_control(buffer);
-        break;
-    }
-    case SET_ANGLE_CALIBRATION:
-    {
-        bt_set_angle_calibration();
         break;
     }
     default:

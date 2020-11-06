@@ -35,14 +35,15 @@ struct private_stepper_t
 	uint8_t active;
 
 	int8_t reverse_direction;
-};
 
-uint32_t max_autoreload = MAX_STEPPING_INTERVAL * CLOCK_FREQUENCY / 1000000;
+	bool timer_stopped;
+};
 
 static void change_speed(private_stepper_t *this, int32_t speed)
 {
 	uint32_t autoreload;
 	this->actual_speed = speed;
+	uint32_t min_speed = 30 * 1000000 / (this->microstepping * STEPS_PER_REVOLUTION * MAX_STEPPING_INTERVAL / 1000);
 	if (speed * this->reverse_direction > 0)
 	{
 		write_pin(this->pins.DIR, 1);
@@ -51,17 +52,23 @@ static void change_speed(private_stepper_t *this, int32_t speed)
 	{
 		write_pin(this->pins.DIR, 0);
 	}
-	if (speed != 0)
+	if (abs(speed) > min_speed)
 	{
-		autoreload = (int32_t)(CLOCK_FREQUENCY * 30) / ((int32_t)this->microstepping * STEPS_PER_REVOLUTION) * 1000 / abs(speed);
-		if (autoreload > max_autoreload)
+		if (this->timer_stopped)
 		{
-			//Nie potrzeba przy dużym microsteppingu
-			//autoreload = 999999;
+			HAL_TIM_OC_Start(this->timer, this->channel);
+			this->timer_stopped = FALSE;
 		}
+		autoreload = (int32_t)(CLOCK_FREQUENCY * 30) / ((int32_t)this->microstepping * STEPS_PER_REVOLUTION) * 1000 / abs(speed);
 	}
 	else
 	{
+		/* Stop OC timer when speed is too low - otherwise it could lag because of long autoreload */
+		if (! this->timer_stopped)
+		{
+			HAL_TIM_OC_Stop(this->timer, this->channel);
+			this->timer_stopped = TRUE;
+		}
 		return;
 	}
 	this->timer->Instance->ARR = autoreload;
@@ -190,6 +197,7 @@ stepper_t *stepper_create(stepper_pins_t pins, bool reverse_direction, TIM_Handl
 		.reverse_direction = reverse_direction ? -1 : 1,
 		.timer = timer,
 		.channel = channel,
+		.timer_stopped = FALSE,
 	};
 
 	this->public.set_microstepping(&(this->public), STEPS_FULL);

@@ -36,9 +36,7 @@ enum drive_command_t {
 	BACKWARD,
 	LEFT,
 	RIGHT,
-	ANGLE_CALIBRATING,
 	JOYSTICK_SPEED,
-	VELOCITY_BRAKE ,
 };
 
 void write_pin (pin_t pin, GPIO_PinState state);
