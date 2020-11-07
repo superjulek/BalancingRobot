@@ -72,7 +72,7 @@ void bt_send_telemetry(UART_HandleTypeDef *huart, telemetry_t telemetry)
     return;
 }
 
-void bt_send_angle_PID_coefs(UART_HandleTypeDef *huart)
+static void bt_send_angle_PID_coefs(UART_HandleTypeDef *huart)
 {
     PID_coefs_t current_coefs = angle_PID->get_PID_coefs(angle_PID);
     PIDConfBuff[0] = ANGLE_PID_COEFS_SIGN;
@@ -80,7 +80,7 @@ void bt_send_angle_PID_coefs(UART_HandleTypeDef *huart)
     HAL_UART_Transmit_DMA(huart, PIDConfBuff, sizeof(PID_coefs_t) + 1);
 }
 
-void bt_send_speed_PID_coefs(UART_HandleTypeDef *huart)
+static void bt_send_speed_PID_coefs(UART_HandleTypeDef *huart)
 {
     PID_coefs_t current_coefs = speed_PID->get_PID_coefs(speed_PID);
     PIDConfBuff[0] = SPEED_PID_COEFS_SIGN;
@@ -88,17 +88,17 @@ void bt_send_speed_PID_coefs(UART_HandleTypeDef *huart)
     HAL_UART_Transmit_DMA(huart, PIDConfBuff, sizeof(PID_coefs_t) + 1);
 }
 
-void bt_stop_robot()
+static void bt_stop_robot()
 {
     scheduler->add_to_queue(scheduler, stop);
 }
 
-void bt_restart_robot()
+static void bt_restart_robot()
 {
     scheduler->add_to_queue(scheduler, restart);
 }
 
-void bt_set_manual_stop()
+static void bt_set_manual_stop()
 {
     if (drive_command != STOP)
     {
@@ -108,7 +108,7 @@ void bt_set_manual_stop()
     }
 }
 
-void bt_set_manual_fwd()
+static void bt_set_manual_fwd()
 {
     if (drive_command != FORWARD)
     {
@@ -118,7 +118,7 @@ void bt_set_manual_fwd()
     }
 }
 
-void bt_set_manual_bwd()
+static void bt_set_manual_bwd()
 {
     if (drive_command != BACKWARD)
     {
@@ -128,7 +128,7 @@ void bt_set_manual_bwd()
     }
 }
 
-void bt_set_manual_left()
+static void bt_set_manual_left()
 {
     if (drive_command != LEFT)
     {
@@ -138,7 +138,7 @@ void bt_set_manual_left()
     }
 }
 
-void bt_set_manual_right()
+static void bt_set_manual_right()
 {
     if (drive_command != RIGHT)
     {
@@ -148,7 +148,7 @@ void bt_set_manual_right()
     }
 }
 
-void bt_set_joystick_control(message_t message)
+static void bt_set_joystick_control(message_t message)
 {
     drive_command = JOYSTICK_SPEED;
     speeds_t new_speeds = {
@@ -159,7 +159,7 @@ void bt_set_joystick_control(message_t message)
     speed_PID->set_desired_signal(speed_PID, new_speeds.driving_speed * joystick_max_driving_speed);
 }
 
-void bt_start_robot()
+static void bt_start_robot()
 {
     if (state == LAUNCHED)
     {
@@ -176,7 +176,7 @@ void bt_start_robot()
     }
 }
 
-void bt_set_PID_coefs(message_t message, PID_t *pid)
+static void bt_set_PID_coefs(message_t message, PID_t *pid)
 {
     PID_coefs_t coefs = {
         .KP_coef = message.data[0],
@@ -186,7 +186,7 @@ void bt_set_PID_coefs(message_t message, PID_t *pid)
     pid->set_PID_coefs(pid, coefs);
 }
 
-void bt_send_manual_speed(UART_HandleTypeDef *huart)
+static void bt_send_manual_speed(UART_HandleTypeDef *huart)
 {
     speeds_t speeds;
     speeds.driving_speed = manual_driving_speed;
@@ -196,7 +196,7 @@ void bt_send_manual_speed(UART_HandleTypeDef *huart)
     HAL_UART_Transmit_DMA(huart, SpeedsBuff, sizeof(speeds_t) + 1);
 }
 
-void bt_send_joystick_speed(UART_HandleTypeDef *huart)
+static void bt_send_joystick_speed(UART_HandleTypeDef *huart)
 {
     speeds_t speeds;
     speeds.driving_speed = joystick_max_driving_speed;
@@ -206,7 +206,7 @@ void bt_send_joystick_speed(UART_HandleTypeDef *huart)
     HAL_UART_Transmit_DMA(huart, SpeedsBuff, sizeof(speeds_t) + 1);
 }
 
-void bt_set_manual_speeds(message_t message)
+static void bt_set_manual_speeds(message_t message)
 {
     speeds_t speeds = {
         .driving_speed = message.data[0],
@@ -224,7 +224,7 @@ void bt_set_manual_speeds(message_t message)
     manual_turning_speed = speeds.turning_speed;
 }
 
-void bt_set_joystick_speeds(message_t message)
+static void bt_set_joystick_speeds(message_t message)
 {
     speeds_t speeds = {
         .driving_speed = message.data[0],

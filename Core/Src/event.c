@@ -92,7 +92,7 @@ static void send_telemetry_callback(void)
 	telemetry_t current_telemetry = {
 		.TargetAngle = target_angle,
 		.Angle = angle,
-		.TargetSpeed = manual_driving_speed, // jw
+		.TargetSpeed = speed_PID->get_desired_signal(speed_PID),
 		.Speed = (float)((left_stepper->get_actual_speed(left_stepper) + right_stepper->get_actual_speed(right_stepper)) / 2),
 		.Battery = ((float)batt_vol * 0.001548 - 3) / (4.2 - 3),
 	};

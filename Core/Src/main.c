@@ -105,8 +105,8 @@ PID_coefs_t angle_PID_coefs = {
 	.KD_coef = 110,
 };
 PID_coefs_t speed_PID_coefs = {
-	.KP_coef = 0.019,
-	.KI_coef = 0.105,
+	.KP_coef = 0.023,
+	.KI_coef = 0.08,
 	.KD_coef = 0.000006,
 };
 pin_t MPU_power_pin = (pin_t){

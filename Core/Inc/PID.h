@@ -14,13 +14,13 @@
 
 /*##### TO BE DEFINED #####*/
 /**
- * PID_FREQUENCY - frequency od PID (Hz) - TODO: move, used only for angle
- * 
  * ANGLE_CORRECTION - angle adjustment per cycle when standind
  * 
  * ACC_PART - accelerometer part in angle calculation
  * 
  * MOUNT_ERROR - mounting error set at startup
+ * 
+ * DESIRED_SIGNAL_SMOOTHING - coef of smoothing desired signal
  */
 /*#########################*/
 
@@ -47,6 +47,11 @@ struct PID_t {
 	 * Set desired signal
 	 */
 	void (*set_desired_signal) (PID_t *public, float desired_signal);
+
+	/**
+	 * Get desired signal
+	 */
+	float (*get_desired_signal) (PID_t *public);
 
 	/**
 	 * Do next time step

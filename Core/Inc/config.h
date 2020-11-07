@@ -19,21 +19,21 @@
 #define MAX_ANGLE 7
 
 #define MAX_TURNING_SPEED 150000
-#define TURNING_SPEED 25000
+#define TURNING_SPEED 50000
 
 #define MAX_DRIVING_SPEED 500000
-#define DRIVING_SPEED 40000
+#define DRIVING_SPEED 100000
 /*########################*/
 
 
 /*##### PID.h config #####*/
-#define PID_FREQUENCY 250
-
 #define ANGLE_CORRECTION 0.002
 
 #define ACC_PART 0.004
 
 #define MOUNT_ERROR -1.0
+
+#define DESIRED_SIGNAL_SMOOTHING 0.8
 /*########################*/
 
 

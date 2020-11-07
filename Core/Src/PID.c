@@ -25,6 +25,8 @@ struct private_PID_t
 
 	float desired_signal;
 
+	float desired_signal_smooth;
+
 	// First in table is most recent value
 	float previous_diffs[HISTORY_SIZE];
 
@@ -76,6 +78,7 @@ static void reset(PID_t *public)
 	this->previous_output_signal = 0;
 	this->output_signal = 0;
 	this->desired_signal = 0;
+	this->desired_signal_smooth = 0;
 }
 
 static void set_desired_signal(PID_t *public, float desired_signal)
@@ -84,10 +87,17 @@ static void set_desired_signal(PID_t *public, float desired_signal)
 	this->desired_signal = desired_signal;
 }
 
+static float get_desired_signal(PID_t *public)
+{
+	private_PID_t *this = (private_PID_t *)public;
+	return this->desired_signal;
+}
+
 static void tic(PID_t *public, float input_signal)
 {
 	private_PID_t *this = (private_PID_t *)public;
-	float diff = input_signal - this->desired_signal;
+	this->desired_signal_smooth = this->desired_signal * (1 - DESIRED_SIGNAL_SMOOTHING) + DESIRED_SIGNAL_SMOOTHING * this->desired_signal_smooth;
+	float diff = input_signal - this->desired_signal_smooth;
 	put_in_history(this, input_signal);
 	float integral_sum = this->integral_sum + diff / (float)this->frequency;
 	this->previous_output_signal = this->output_signal;
@@ -146,6 +156,7 @@ PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, u
 		.public = {
 			.reset = reset,
 			.set_desired_signal = set_desired_signal,
+			.get_desired_signal = get_desired_signal,
 			.tic = tic,
 			.get_output = get_output,
 			.get_output_smooth = get_output_smooth,
