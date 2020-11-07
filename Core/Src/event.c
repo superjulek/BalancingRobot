@@ -134,12 +134,12 @@ static void movement_control_tic_callback(void)
 	int32_t output = (int32_t)angle_PID->get_output(angle_PID);
 	/* For smoother control */
 	static int32_t averaged_output = 0;
-	averaged_output = averaged_output * 0.05 + output * 0.95;
+	averaged_output = averaged_output * 0.1 + output * 0.9;
 	switch (drive_command)
 	{
 	case STOP:
 		/* Slowly fix mount angle */
-		if (abs(output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT)
+		if (abs(averaged_output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT)
 		{
 			mount_error += MOUNT_ANGLE_CORECTION * angle;
 			target_angle -= MOUNT_ANGLE_CORECTION * angle;

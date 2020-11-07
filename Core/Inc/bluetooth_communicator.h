@@ -10,10 +10,8 @@
 
 #include "usart.h"
 
-/* Receided buffer size */
-#define RECEIVED_BUFFER_SIZE        16
-
 typedef struct telemetry_t telemetry_t;
+typedef struct message_t message_t;
 
 struct telemetry_t {
 	float TargetAngle;
@@ -22,6 +20,14 @@ struct telemetry_t {
 	float Speed;
 	float Battery;
 };
+
+struct message_t {
+	uint8_t sign;
+	float data[3];
+} __attribute__((packed));
+
+/* Receided buffer size */
+#define RECEIVED_BUFFER_SIZE        sizeof(message_t)
 
 void bt_send_telemetry(UART_HandleTypeDef *huart, telemetry_t telemetry);
 

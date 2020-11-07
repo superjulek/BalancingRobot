@@ -148,11 +148,13 @@ void bt_set_manual_right()
     }
 }
 
-void bt_set_joystick_control(buffer)
+void bt_set_joystick_control(message_t message)
 {
     drive_command = JOYSTICK_SPEED;
-    speeds_t new_speeds;
-    memcpy(&new_speeds, buffer + 4, sizeof(speeds_t));
+    speeds_t new_speeds = {
+        .driving_speed = message.data[0],
+        .turning_speed = message.data[1],
+    };
     set_turining_speed = new_speeds.turning_speed * joystick_max_turning_speed;
     speed_PID->set_desired_signal(speed_PID, new_speeds.driving_speed * joystick_max_driving_speed);
 }
@@ -174,10 +176,13 @@ void bt_start_robot()
     }
 }
 
-void bt_set_PID_coefs(uint8_t *buffer, PID_t *pid)
+void bt_set_PID_coefs(message_t message, PID_t *pid)
 {
-    PID_coefs_t coefs;
-    memcpy(&coefs, buffer + 4, sizeof(PID_coefs_t));
+    PID_coefs_t coefs = {
+        .KP_coef = message.data[0],
+        .KI_coef = message.data[1],
+        .KD_coef = message.data[2],
+    };
     pid->set_PID_coefs(pid, coefs);
 }
 
@@ -201,10 +206,12 @@ void bt_send_joystick_speed(UART_HandleTypeDef *huart)
     HAL_UART_Transmit_DMA(huart, SpeedsBuff, sizeof(speeds_t) + 1);
 }
 
-void bt_set_manual_speeds(uint8_t *buffer)
+void bt_set_manual_speeds(message_t message)
 {
-    speeds_t speeds;
-    memcpy(&speeds, buffer + 4, sizeof(speeds_t));
+    speeds_t speeds = {
+        .driving_speed = message.data[0],
+        .turning_speed = message.data[1],
+    };
     if (speeds.driving_speed > MAX_DRIVING_SPEED)
         speeds.driving_speed = (float)MAX_DRIVING_SPEED;
     if (speeds.driving_speed < 0)
@@ -217,10 +224,12 @@ void bt_set_manual_speeds(uint8_t *buffer)
     manual_turning_speed = speeds.turning_speed;
 }
 
-void bt_set_joystick_speeds(uint8_t *buffer)
+void bt_set_joystick_speeds(message_t message)
 {
-    speeds_t speeds;
-    memcpy(&speeds, buffer + 4, sizeof(speeds_t));
+    speeds_t speeds = {
+        .driving_speed = message.data[0],
+        .turning_speed = message.data[1],
+    };
     if (speeds.driving_speed > MAX_DRIVING_SPEED)
         speeds.driving_speed = (float)MAX_DRIVING_SPEED;
     if (speeds.driving_speed < 0)
@@ -235,9 +244,9 @@ void bt_set_joystick_speeds(uint8_t *buffer)
 
 void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer)
 {
-    uint32_t signal;
-    memcpy(&signal, buffer, 4);
-    switch (signal)
+    message_t message;
+    memcpy(&message, buffer, RECEIVED_BUFFER_SIZE);
+    switch (message.sign)
     {
     case GET_ANGLE_PID_COEFS_SIGN:
     {
@@ -266,12 +275,12 @@ void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer)
     }
     case SET_ANGLE_PID_COEFS_SIGN:
     {
-        bt_set_PID_coefs(buffer, angle_PID);
+        bt_set_PID_coefs(message, angle_PID);
         break;
     }
     case SET_SPEED_PID_COEFS_SIGN:
     {
-        bt_set_PID_coefs(buffer, speed_PID);
+        bt_set_PID_coefs(message, speed_PID);
         break;
     }
     case GET_MANUAL_SPEED:
@@ -286,12 +295,12 @@ void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer)
     }
     case SET_MANUAL_SPEED:
     {
-        bt_set_manual_speeds(buffer);
+        bt_set_manual_speeds(message);
         break;
     }
     case SET_JOYSTICK_SPEED:
     {
-        bt_set_joystick_speeds(buffer);
+        bt_set_joystick_speeds(message);
         break;
     }
     case SET_MANUAL_STOP:
@@ -321,7 +330,7 @@ void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer)
     }
     case SET_JOYSTICK_CONTROL:
     {
-        bt_set_joystick_control(buffer);
+        bt_set_joystick_control(message);
         break;
     }
     default:
