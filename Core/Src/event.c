@@ -143,6 +143,7 @@ static void movement_control_tic_callback(void)
 		{
 			mount_error += MOUNT_ANGLE_CORECTION * angle;
 			target_angle -= MOUNT_ANGLE_CORECTION * angle;
+			myMPU->set_mount_error(myMPU, mount_error);
 		}
 	case FORWARD:
 	case BACKWARD:
@@ -183,7 +184,7 @@ event_t process_rbuf = {
 
 static void begin_waiting_callback(void)
 {
-	send_string("WAITING\n");
+	bt_send_message(&huart1, "WAITING");
 	scheduler->add_to_queue(scheduler, reset_everything);
 	state = WAITING_FOR_LAUNCH;
 }
@@ -206,7 +207,7 @@ event_t reset_everything = {
 
 static void launch_callback(void)
 {
-	send_string("START\n");
+	bt_send_message(&huart1, "START");
 	left_stepper->start(left_stepper);
 	right_stepper->start(right_stepper);
 	angle_PID->reset(angle_PID);
@@ -222,7 +223,7 @@ static void stop_callback(void)
 {
 	if (state != STOPPED)
 	{
-		send_string("STOP\n");
+		bt_send_message(&huart1, "STOP");
 		left_stepper->stop(left_stepper);
 		right_stepper->stop(right_stepper);
 		drive_command = STOP;
@@ -230,7 +231,7 @@ static void stop_callback(void)
 	}
 	else
 	{
-		send_string("ALREADY STOPPED\n");
+		bt_send_message(&huart1, "ALREADY STOPPED");
 	}
 }
 
@@ -256,7 +257,7 @@ static void emergency_check_callback(void)
 {
 	if (fabs(angle) > MAX_ANGLE)
 	{
-		send_string("MAX ANGLE\n");
+		bt_send_message(&huart1, "MAX ANGLE");
 		scheduler->add_to_queue(scheduler, stop);
 	}
 }

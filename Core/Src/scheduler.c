@@ -9,6 +9,7 @@
 #include "config.h"
 #include "general.h"
 #include "stdlib.h"
+#include "bluetooth_communicator.h"
 
 typedef struct private_scheduler_t private_scheduler_t;
 
@@ -50,7 +51,7 @@ static void add_to_queue(scheduler_t *public, event_t event)
 		this->last_event = 0;
 	if (this->last_event == this->first_event)
 	{
-		send_string("QUE OVERFLOW\n");
+		bt_send_message(&huart1, "QUE OVERFLOW");
 	}
 }
 

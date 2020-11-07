@@ -64,6 +64,11 @@ struct MPU_t
      * Reset mount error
      */
     void (*reset_mount_error)(MPU_t *public);
+
+    /**
+     * Set value of mount error
+     */
+    void (*set_mount_error)(MPU_t *public, float mount_error);
 };
 
 struct MPU_reading_t

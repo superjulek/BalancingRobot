@@ -8,6 +8,11 @@
 #ifndef INC_BLUETOOTH_COMMUNICATOR_H_
 #define INC_BLUETOOTH_COMMUNICATOR_H_
 
+/*##### TO BE DEFINED #####*/
+/**
+ * MESSAGE_BUFF_SIZE - max size of sent message size 
+ */
+/*#########################*/
 #include "usart.h"
 
 typedef struct telemetry_t telemetry_t;
@@ -32,6 +37,8 @@ struct message_t {
 void bt_send_telemetry(UART_HandleTypeDef *huart, telemetry_t telemetry);
 
 void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer);
+
+void bt_send_message(UART_HandleTypeDef *huart, char *message);
 
 
 #endif /* INC_BLUETOOTH_COMMUNICATOR_H_ */

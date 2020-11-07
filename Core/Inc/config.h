@@ -16,7 +16,7 @@
 
 #define MAX_STANDING_SPEED 4000
 
-#define MAX_ANGLE 7
+#define MAX_ANGLE 8
 
 #define MAX_TURNING_SPEED 150000
 #define TURNING_SPEED 50000
@@ -29,8 +29,6 @@
 /*##### PID.h config #####*/
 #define ANGLE_CORRECTION 0.002
 
-#define ACC_PART 0.004
-
 #define MOUNT_ERROR -1.0
 
 #define DESIRED_SIGNAL_SMOOTHING 0.8
@@ -38,6 +36,8 @@
 
 
 /*##### MPU.h config #####*/
+#define ACC_PART 0.005
+
 #define I2C_TIMEOUT 1
 
 #define CALIBRATION_ROUNDS 2000
@@ -65,6 +65,10 @@
 #define MAX_SPEED 800000
 
 #define MAX_STEPPING_INTERVAL 4000
+/*########################*/
+
+/*## bluetooth_communicator.h config ##*/
+#define MESSAGE_BUFF_SIZE 20
 /*########################*/
 
 

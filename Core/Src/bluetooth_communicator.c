@@ -5,6 +5,8 @@
  *      Author: juliusz
  */
 
+#include <string.h>
+
 #include "bluetooth_communicator.h"
 #include "PID.h"
 #include "event.h"
@@ -14,11 +16,12 @@
 
 /* Communication signs - robot -> controller */
 /* 7th bit for state */
-#define TELEMETRY_SIGN 0b10000001
-#define ANGLE_PID_COEFS_SIGN 0b10000010
-#define SPEED_PID_COEFS_SIGN 0b10000011
-#define MANUAL_SPEEDS_SIGN 0b10000100
-#define JOYSTICK_SPEEDS_SIGN 0b10000101
+#define TELEMETRY_SIGN          0b10000001
+#define ANGLE_PID_COEFS_SIGN    0b10000010
+#define SPEED_PID_COEFS_SIGN    0b10000011
+#define MANUAL_SPEEDS_SIGN      0b10000100
+#define JOYSTICK_SPEEDS_SIGN    0b10000101
+#define MESSAGE_SIGN            0b10000110
 
 /* Communication signs - controller -> robot */
 #define GET_ANGLE_PID_COEFS_SIGN 0x00
@@ -61,6 +64,7 @@ extern float set_turining_speed;
 uint8_t TelemetryBuff[sizeof(telemetry_t) + 1];
 uint8_t PIDConfBuff[sizeof(PID_coefs_t) + 1];
 uint8_t SpeedsBuff[sizeof(speeds_t) + 1];
+unsigned char MessageBuff[MESSAGE_BUFF_SIZE];
 
 void bt_send_telemetry(UART_HandleTypeDef *huart, telemetry_t telemetry)
 {
@@ -69,6 +73,18 @@ void bt_send_telemetry(UART_HandleTypeDef *huart, telemetry_t telemetry)
         TelemetryBuff[0] |= 0b01000000;
     memcpy(TelemetryBuff + 1, &telemetry, sizeof(telemetry_t));
     HAL_UART_Transmit_DMA(huart, TelemetryBuff, sizeof(telemetry_t) + 1);
+    return;
+}
+
+void bt_send_message(UART_HandleTypeDef *huart, char *message)
+{
+    if (strlen(message) + 1 > MESSAGE_BUFF_SIZE)
+    {
+        message = "Message too long";
+    }
+    MessageBuff[0] = MESSAGE_SIGN;
+    memcpy(MessageBuff + 1, message, strlen(message)); // Sign on first place
+    HAL_UART_Transmit_DMA(huart, MessageBuff, strlen(message) + 1);
     return;
 }
 
@@ -104,7 +120,7 @@ static void bt_set_manual_stop()
     {
         drive_command = STOP;
         speed_PID->set_desired_signal(speed_PID, 0);
-        send_string("stopping");
+        bt_send_message(&huart1, "stopping");
     }
 }
 
@@ -114,7 +130,7 @@ static void bt_set_manual_fwd()
     {
         drive_command = FORWARD;
         speed_PID->set_desired_signal(speed_PID, manual_driving_speed);
-        send_string("going fwd\n");
+        bt_send_message(&huart1, "going fwd\n");
     }
 }
 
@@ -124,7 +140,7 @@ static void bt_set_manual_bwd()
     {
         drive_command = BACKWARD;
         speed_PID->set_desired_signal(speed_PID, -manual_driving_speed);
-        send_string("going bwd\n");
+        bt_send_message(&huart1, "going bwd\n");
     }
 }
 
@@ -163,7 +179,7 @@ static void bt_start_robot()
 {
     if (state == LAUNCHED)
     {
-        send_string("ALREADY RUNNING\n");
+        bt_send_message(&huart1, "ALREADY RUNNING");
     }
     else if (state == STOPPED)
     {

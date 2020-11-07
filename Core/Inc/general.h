@@ -41,8 +41,6 @@ enum drive_command_t {
 
 void write_pin (pin_t pin, GPIO_PinState state);
 
-void send_string (char *string);
-
 #define bool uint8_t
 
 #define TRUE 1

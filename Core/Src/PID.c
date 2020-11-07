@@ -61,8 +61,8 @@ static void put_in_history(private_PID_t *this, float diff)
 
 static float get_derivative(private_PID_t *this)
 {
-	float derivative = (-11. / 6. * this->previous_diffs[0] + 3. * this->previous_diffs[1] -
-						3. / 2. * this->previous_diffs[2] + 1. / 3. * this->previous_diffs[3]) *
+	float derivative = (11. / 6. * this->previous_diffs[0] - 3. * this->previous_diffs[1] +
+						3. / 2. * this->previous_diffs[2] - 1. / 3. * this->previous_diffs[3]) *
 					   (float)this->frequency;
 	return derivative;
 }

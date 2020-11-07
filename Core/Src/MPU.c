@@ -8,6 +8,7 @@
 #include "MPU.h"
 #include "MPU_defines.h"
 #include "config.h"
+#include "bluetooth_communicator.h"
 
 #include "i2c.h"
 #include <math.h>
@@ -146,13 +147,13 @@ static MPU_reading_t GetAllRAW(private_MPU_t *this)
     uint8_t tmp[14];
     HAL_StatusTypeDef status = HAL_I2C_Mem_Read(this->I2C, this->address, MPU6050_RA_ACCEL_XOUT_H, 1, tmp, 14, I2C_TIMEOUT);
 
-	int16_t x = (((int16_t)tmp[0]) << 8) | tmp[1];
-	int16_t y = (((int16_t)tmp[2]) << 8) | tmp[3];
-	int16_t z = (((int16_t)tmp[4]) << 8) | tmp[5];
+    int16_t x = (((int16_t)tmp[0]) << 8) | tmp[1];
+    int16_t y = (((int16_t)tmp[2]) << 8) | tmp[3];
+    int16_t z = (((int16_t)tmp[4]) << 8) | tmp[5];
 
-	int16_t rx = ((((int16_t)tmp[8]) << 8) | tmp[9]) - this->rx_cal;
-	int16_t ry = ((((int16_t)tmp[10]) << 8) | tmp[11]) - this->ry_cal;
-	int16_t rz = ((((int16_t)tmp[12]) << 8) | tmp[13]) - this->rz_cal;
+    int16_t rx = ((((int16_t)tmp[8]) << 8) | tmp[9]) - this->rx_cal;
+    int16_t ry = ((((int16_t)tmp[10]) << 8) | tmp[11]) - this->ry_cal;
+    int16_t rz = ((((int16_t)tmp[12]) << 8) | tmp[13]) - this->rz_cal;
 
     MPU_reading_t result;
     result.x = (float)x;
@@ -185,8 +186,8 @@ static void reset(MPU_t *public)
 {
     private_MPU_t *this = (private_MPU_t *)public;
 
-    send_string("\nRESET MPU\n");
-	MX_I2C1_Init();
+    bt_send_message(&huart1, "RESET MPU");
+    MX_I2C1_Init();
     write_pin(this->power_pin, 0);
     HAL_Delay(10);
     write_pin(this->power_pin, 1);
@@ -272,9 +273,16 @@ static HAL_StatusTypeDef calibrate_gyro(MPU_t *public)
     this->ry_cal = y_sum / cal_num;
     this->rz_cal = z_sum / cal_num;
     char buff[30];
-    sprintf(buff, "C:x=%dy=%dz=%d\n", this->rx_cal, this->ry_cal, this->rz_cal);
-    send_string(buff);
+    sprintf(buff, "C:x%dy%dz%d", this->rx_cal, this->ry_cal, this->rz_cal);
+    HAL_Delay(2);
+    bt_send_message(&huart1, buff);
     return status;
+}
+
+static void set_mount_error(MPU_t *public, float (mount_error))
+{
+    private_MPU_t *this = (private_MPU_t *)public;
+    this->mount_error = mount_error;
 }
 
 MPU_t *MPU_create(I2C_HandleTypeDef *I2C, uint16_t frequency, pin_t power_pin, uint8_t address)
@@ -290,6 +298,7 @@ MPU_t *MPU_create(I2C_HandleTypeDef *I2C, uint16_t frequency, pin_t power_pin, u
             .reset_last_angle = reset_last_angle,
             .reset_mount_error = reset_mount_error,
             .set_last_angle = set_last_angle,
+            .set_mount_error = set_mount_error,
         },
         .I2C = I2C,
         .frequency = frequency,
