@@ -8,8 +8,26 @@
 #ifndef INC_CONFIG_H_
 #define INC_CONFIG_H_
 
-/* Define below "TO BE DEFINED" from specific .h files */
+/* Steering defines */
+#define INIT_SPEED_KP 0.025
+#define INIT_SPEED_KI 0.06
+#define INIT_SPEED_KD 0.0002
 
+#define INIT_ANGLE_KP 23000
+#define INIT_ANGLE_KI 190000
+#define INIT_ANGLE_KD 20
+
+#define MAX_STEERING_ANGLE 3500 // in mdeg
+
+#define SPEED_DEADBAND 2000 // in mrpm
+#define ANGLE_DEADBAND 0
+
+#define SPEED_PID_DIVIDER 1000
+
+#define ANGLE_PID_SMOOTHER 0.1
+#define SPEED_PID_SMOOTHER 0.5
+
+/* Define below "TO BE DEFINED" from specific .h files */
 
 /*#### general config ####*/
 #define MAX_ANGLE_STANDING 0.7

@@ -134,7 +134,7 @@ static void movement_control_tic_callback(void)
 	int32_t output = (int32_t)angle_PID->get_output(angle_PID);
 	/* For smoother control */
 	static int32_t averaged_output = 0;
-	averaged_output = averaged_output * 0.1 + output * 0.9;
+	averaged_output = averaged_output * 0.1 + output * 0.9; // TODO: move this into PID method
 	switch (drive_command)
 	{
 	case STOP:
@@ -151,7 +151,7 @@ static void movement_control_tic_callback(void)
 	case RIGHT:
 	case JOYSTICK_SPEED:
 		speed_PID->tic(speed_PID, averaged_output);
-		target_angle = -speed_PID->get_output_smooth(speed_PID) / 1000.;
+		target_angle = -speed_PID->get_output_smooth(speed_PID) / SPEED_PID_DIVIDER;
 		break;
 	}
 	angle_PID->set_desired_signal(angle_PID, target_angle);
