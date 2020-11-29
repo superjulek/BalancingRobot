@@ -108,7 +108,7 @@ event_t send_telemetry = {
 static void angle_PID_tic_callback(void)
 {
 	angle_PID->tic(angle_PID, angle);
-	int32_t speed = (int32_t)angle_PID->get_output_smooth(angle_PID);
+	int32_t speed = (int32_t)angle_PID->get_output(angle_PID);
 	if (drive_command == LEFT)
 	{
 		left_stepper->set_speed(left_stepper, speed - (int32_t)set_turining_speed);
@@ -149,7 +149,7 @@ static void movement_control_tic_callback(void)
 	case RIGHT:
 	case JOYSTICK_SPEED:
 		speed_PID->tic(speed_PID, output);
-		target_angle = -speed_PID->get_output_smooth(speed_PID) / SPEED_PID_DIVIDER;
+		target_angle = -speed_PID->get_output(speed_PID) / SPEED_PID_DIVIDER;
 		break;
 	}
 	angle_PID->set_desired_signal(angle_PID, target_angle);

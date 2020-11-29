@@ -64,13 +64,10 @@ struct PID_t {
 	float (*get_output) (PID_t *public);
 
 	/**
-	 * Get output smooth
-	 */
-	float (*get_output_smooth) (PID_t *public);
-	/**
 	 * Set new PID coefs
 	 */
 	void (*set_PID_coefs) (PID_t *public, PID_coefs_t coefs);
+
 	/**
 	 * Get PID coefs
 	 */
@@ -80,7 +77,7 @@ struct PID_t {
 /**
  * Create PID instance
  */
-PID_t* PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float delay_coef, float input_smooth_coef, float desired_signal_smooth_coef);
+PID_t* PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float average_coef);
 
 // Get current robot angle
 float get_angle(void);

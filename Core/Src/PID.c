@@ -25,8 +25,6 @@ struct private_PID_t
 
 	float desired_signal;
 
-	float desired_signal_smooth;
-
 	// First in table is most recent value
 	float previous_diffs[HISTORY_SIZE];
 
@@ -40,17 +38,13 @@ struct private_PID_t
 
 	float dead_band;
 
-	float delay_coef;
-
-	float input_smooth_coef;
-
-	float input_smooth;
-
 	PID_coefs_t coefs;
 
 	uint16_t frequency;
 
-	float desired_signal_smooth_coef;
+	float diff_average_coef;
+
+	float diff_smooth;
 };
 
 /**
@@ -67,9 +61,10 @@ static void put_in_history(private_PID_t *this, float diff)
 
 static float get_derivative(private_PID_t *this)
 {
-	float derivative = (11. / 6. * this->previous_diffs[0] - 3. * this->previous_diffs[1] +
-						3. / 2. * this->previous_diffs[2] - 1. / 3. * this->previous_diffs[3]) *
-					   (float)this->frequency;
+	//float derivative = (11. / 6. * this->previous_diffs[0] - 3. * this->previous_diffs[1] +
+	//					3. / 2. * this->previous_diffs[2] - 1. / 3. * this->previous_diffs[3]) *
+	//				   (float)this->frequency;
+	float derivative = (this->previous_diffs[0] - this->previous_diffs[1]) / (float) this->frequency;
 	return derivative;
 }
 
@@ -84,8 +79,7 @@ static void reset(PID_t *public)
 	this->previous_output_signal = 0;
 	this->output_signal = 0;
 	this->desired_signal = 0;
-	this->desired_signal_smooth = 0;
-	this->input_smooth = 0;
+	this->diff_smooth = 0;
 }
 
 static void set_desired_signal(PID_t *public, float desired_signal)
@@ -103,15 +97,13 @@ static float get_desired_signal(PID_t *public)
 static void tic(PID_t *public, float input_signal)
 {
 	private_PID_t *this = (private_PID_t *)public;
-	/* Filter smoothing desired signal */
-	this->desired_signal_smooth = this->desired_signal * (1 - this->desired_signal_smooth_coef) + this->desired_signal_smooth_coef * this->desired_signal_smooth;
-	/* Filter smoothing input signal */
-	this->input_smooth = input_signal * (1 - this->input_smooth_coef) + this->input_smooth_coef * this->input_smooth;
-	float diff = this->input_smooth - this->desired_signal_smooth;
-	put_in_history(this, this->input_smooth);
-	float integral_sum = this->integral_sum + diff / (float)this->frequency;
+	float diff = input_signal - this->desired_signal;
+	/* Filter smoothing diff */
+	this->diff_smooth = this->diff_average_coef * diff + (1 - this->diff_average_coef) * this->diff_smooth;
+	put_in_history(this, this->diff_smooth);
+	float integral_sum = this->integral_sum + this->diff_smooth / (float)this->frequency;
 	this->previous_output_signal = this->output_signal;
-	float output_signal = this->coefs.KP_coef * diff +
+	float output_signal = this->coefs.KP_coef * this->diff_smooth +
 						  this->coefs.KI_coef * integral_sum +
 						  this->coefs.KD_coef * get_derivative(this);
 	if (output_signal > this->max_output_signal)
@@ -140,14 +132,6 @@ static float get_output(PID_t *public)
 	return this->output_signal;
 }
 
-static float get_output_smooth(PID_t *public)
-{
-	private_PID_t *this = (private_PID_t *)public;
-	/* Filter smoothing output */
-	return (this->output_signal * (1.0 - this->delay_coef) +
-			this->previous_output_signal * this->delay_coef);
-}
-
 static void set_PID_coefs(PID_t *public, PID_coefs_t coefs)
 {
 	private_PID_t *this = (private_PID_t *)public;
@@ -160,7 +144,7 @@ static PID_coefs_t get_PID_coefs(PID_t *public, PID_coefs_t coefs)
 	return this->coefs;
 }
 
-PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float delay_coef, float input_smooth_coef, float desired_signal_smooth_coef)
+PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float diff_average_coef)
 {
 	private_PID_t *this = malloc(sizeof(private_PID_t));
 	*this = (private_PID_t){
@@ -170,7 +154,6 @@ PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, u
 			.get_desired_signal = get_desired_signal,
 			.tic = tic,
 			.get_output = get_output,
-			.get_output_smooth = get_output_smooth,
 			.set_PID_coefs = set_PID_coefs,
 			.get_PID_coefs = get_PID_coefs,
 		},
@@ -178,25 +161,10 @@ PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, u
 		.dead_band = dead_band,
 		.max_output_signal = max_output_signal,
 		.frequency = frequency,
-		.delay_coef = delay_coef,
-		.input_smooth_coef = input_smooth_coef,
-		.desired_signal_smooth_coef = desired_signal_smooth_coef,
+		.diff_average_coef = diff_average_coef,
 		};
 
 	this->public.reset(&(this->public));
 
 	return &(this->public);
-}
-
-float follow_angle(int32_t speed, float desired_angle)
-{
-	if (speed > 0)
-	{
-		return desired_angle - ANGLE_CORRECTION;
-	}
-	if (speed < 0)
-	{
-		return desired_angle + ANGLE_CORRECTION;
-	}
-	return desired_angle;
 }

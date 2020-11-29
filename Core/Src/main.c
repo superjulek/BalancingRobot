@@ -160,8 +160,8 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	left_stepper = stepper_create(left_stepper_pins, TRUE, &htim5, TIM_CHANNEL_1);
 	right_stepper = stepper_create(right_stepper_pins, FALSE, &htim2, TIM_CHANNEL_1);
-	angle_PID = PID_create(angle_PID_coefs, ANGLE_PID_DEADBAND, MAX_SPEED, 250, ANGLE_PID_DELAY_COEF, ANGLE_PID_INPUT_SMOOTH_COEF, ANGLE_PID_DESIRED_SIGNAL_SMOOTH_COEF);
-	speed_PID = PID_create(speed_PID_coefs, SPEED_PID_DEADBAND, MAX_STEERING_ANGLE, 250, SPEED_PID_DELAY_COEF, SPEED_PID_INPUT_SMOOTH_COEF, SPEED_PID_DESIRED_SIGNAL_SMOOTH_COEF);
+	angle_PID = PID_create(angle_PID_coefs, ANGLE_PID_DEADBAND, MAX_SPEED, 250, ANGLE_PID_DIFF_AVERAGE_COEF);
+	speed_PID = PID_create(speed_PID_coefs, SPEED_PID_DEADBAND, MAX_STEERING_ANGLE, 250, SPEED_PID_DIFF_AVERAGE_COEF);
 	scheduler = scheduler_create();
   /* USER CODE END 1 */
 
