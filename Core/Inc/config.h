@@ -22,10 +22,13 @@
 #define ANGLE_PID_DEADBAND 000. // in mrpm
 #define SPEED_PID_DEADBAND 0.1 // in mdeg
 
-#define SPEED_PID_DIVIDER 1000.
+#define SPEED_PID_DIVIDER 1000. // to operate in mdeg
 
 #define SPEED_PID_DIFF_AVERAGE_COEF 0.55
 #define ANGLE_PID_DIFF_AVERAGE_COEF 0.95
+
+#define SPEED_PID_MAX_CHANGE 1000000
+#define ANGLE_PID_MAX_CHANGE 0 // no ramp for angle pid
 
 /* Define below "TO BE DEFINED" from specific .h files */
 

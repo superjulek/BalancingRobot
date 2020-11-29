@@ -45,6 +45,10 @@ struct private_PID_t
 	float diff_average_coef;
 
 	float diff_smooth;
+	/* Max desired signal change per second */
+	float max_diff;
+	/* Desired signal to be ramped */
+	float desired_output_to_ramp;
 };
 
 /**
@@ -80,6 +84,7 @@ static void reset(PID_t *public)
 	this->output_signal = 0;
 	this->desired_signal = 0;
 	this->diff_smooth = 0;
+	this->desired_output_to_ramp = 0;
 }
 
 static void set_desired_signal(PID_t *public, float desired_signal)
@@ -144,7 +149,31 @@ static PID_coefs_t get_PID_coefs(PID_t *public, PID_coefs_t coefs)
 	return this->coefs;
 }
 
-PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float diff_average_coef)
+static void ramp(PID_t *public)
+{
+	private_PID_t *this = (private_PID_t *)public;
+		float diff = this->desired_output_to_ramp - this->desired_signal;
+		if (diff > this->max_diff)
+		{
+			this->desired_signal = this->desired_signal + this->max_diff;
+		}
+		else if (diff < -this->max_diff)
+		{
+			this->desired_signal = this->desired_signal - this->max_diff;
+		}
+		else
+		{
+			this->desired_signal = this->desired_output_to_ramp;
+		}
+}
+
+static void set_desired_signal_to_ramp (PID_t *public, float desired_signal_to_ramp)
+{
+	private_PID_t *this = (private_PID_t *)public;
+	this->desired_output_to_ramp = desired_signal_to_ramp;
+}
+
+PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float diff_average_coef, float max_change)
 {
 	private_PID_t *this = malloc(sizeof(private_PID_t));
 	*this = (private_PID_t){
@@ -156,12 +185,15 @@ PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, u
 			.get_output = get_output,
 			.set_PID_coefs = set_PID_coefs,
 			.get_PID_coefs = get_PID_coefs,
+			.set_desired_signal_to_ramp = set_desired_signal_to_ramp,
+			.ramp = ramp,
 		},
 		.coefs = coefs,
 		.dead_band = dead_band,
 		.max_output_signal = max_output_signal,
 		.frequency = frequency,
 		.diff_average_coef = diff_average_coef,
+		.max_diff = max_change / frequency,
 		};
 
 	this->public.reset(&(this->public));

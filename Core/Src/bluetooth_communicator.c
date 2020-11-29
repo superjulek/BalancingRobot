@@ -121,7 +121,7 @@ static void bt_set_manual_stop()
     if (drive_command != STOP)
     {
         drive_command = STOP;
-        speed_PID->set_desired_signal(speed_PID, 0);
+        speed_PID->set_desired_signal_to_ramp(speed_PID, 0);
         bt_send_message(&huart1, "stopping");
     }
 }
@@ -131,7 +131,7 @@ static void bt_set_manual_fwd()
     if (drive_command != FORWARD)
     {
         drive_command = FORWARD;
-        speed_PID->set_desired_signal(speed_PID, manual_driving_speed);
+        speed_PID->set_desired_signal_to_ramp(speed_PID, manual_driving_speed);
         bt_send_message(&huart1, "going fwd\n");
     }
 }
@@ -141,7 +141,7 @@ static void bt_set_manual_bwd()
     if (drive_command != BACKWARD)
     {
         drive_command = BACKWARD;
-        speed_PID->set_desired_signal(speed_PID, -manual_driving_speed);
+        speed_PID->set_desired_signal_to_ramp(speed_PID, -manual_driving_speed);
         bt_send_message(&huart1, "going bwd\n");
     }
 }
@@ -152,7 +152,7 @@ static void bt_set_manual_left()
     {
         drive_command = LEFT;
         set_turining_speed = manual_turning_speed;
-        speed_PID->set_desired_signal(speed_PID, 0);
+        speed_PID->set_desired_signal_to_ramp(speed_PID, 0);
     }
 }
 
@@ -162,7 +162,7 @@ static void bt_set_manual_right()
     {
         drive_command = RIGHT;
         set_turining_speed = manual_turning_speed;
-        speed_PID->set_desired_signal(speed_PID, 0);
+        speed_PID->set_desired_signal_to_ramp(speed_PID, 0);
     }
 }
 
@@ -174,7 +174,7 @@ static void bt_set_joystick_control(message_t message)
         .turning_speed = message.data[1],
     };
     set_turining_speed = new_speeds.turning_speed * joystick_max_turning_speed;
-    speed_PID->set_desired_signal(speed_PID, new_speeds.driving_speed * joystick_max_driving_speed);
+    speed_PID->set_desired_signal_to_ramp(speed_PID, new_speeds.driving_speed * joystick_max_driving_speed);
 }
 
 static void bt_start_robot()

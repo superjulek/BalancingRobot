@@ -148,6 +148,7 @@ static void movement_control_tic_callback(void)
 	case LEFT:
 	case RIGHT:
 	case JOYSTICK_SPEED:
+		speed_PID->ramp(speed_PID);
 		speed_PID->tic(speed_PID, output);
 		target_angle = -speed_PID->get_output(speed_PID) / SPEED_PID_DIVIDER;
 		break;
