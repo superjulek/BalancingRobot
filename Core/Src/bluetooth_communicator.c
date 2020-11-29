@@ -24,23 +24,24 @@
 #define MESSAGE_SIGN            0b10000110
 
 /* Communication signs - controller -> robot */
-#define GET_ANGLE_PID_COEFS_SIGN 0x00
-#define GET_SPEED_PID_COEFS_SIGN 0x01
-#define STOP_ROBOT 0x02
-#define RESTART_ROBOT 0x03
-#define START_ROBOT 0x04
-#define SET_ANGLE_PID_COEFS_SIGN 0x05
-#define SET_SPEED_PID_COEFS_SIGN 0x06
-#define GET_MANUAL_SPEED 0x07
-#define GET_JOYSTICK_SPEED 0x08
-#define SET_MANUAL_SPEED 0x09
-#define SET_JOYSTICK_SPEED 0x0A
-#define SET_MANUAL_STOP 0x0B
-#define SET_MANUAL_FWD 0x0C
-#define SET_MANUAL_BWD 0x0D
-#define SET_MANUAL_LEFT 0x0E
-#define SET_MANUAL_RIGHT 0x0F
-#define SET_JOYSTICK_CONTROL 0x10
+#define GET_ANGLE_PID_COEFS_SIGN        0x00
+#define GET_SPEED_PID_COEFS_SIGN        0x01
+#define STOP_ROBOT                      0x02
+#define RESTART_ROBOT                   0x03
+#define START_ROBOT                     0x04
+#define SET_ANGLE_PID_COEFS_SIGN        0x05
+#define SET_SPEED_PID_COEFS_SIGN        0x06
+#define GET_MANUAL_SPEED                0x07
+#define GET_JOYSTICK_SPEED              0x08
+#define SET_MANUAL_SPEED                0x09
+#define SET_JOYSTICK_SPEED              0x0A
+#define SET_MANUAL_STOP                 0x0B
+#define SET_MANUAL_FWD                  0x0C
+#define SET_MANUAL_BWD                  0x0D
+#define SET_MANUAL_LEFT                 0x0E
+#define SET_MANUAL_RIGHT                0x0F
+#define SET_JOYSTICK_CONTROL            0x10
+#define TOGGLE_ANGLE_CORRECTION          0x11
 
 typedef struct speeds_t speeds_t;
 
@@ -60,6 +61,7 @@ extern scheduler_t *scheduler;
 extern robot_state_t state;
 extern drive_command_t drive_command;
 extern float set_turining_speed;
+extern bool angle_correction;
 
 uint8_t TelemetryBuff[sizeof(telemetry_t) + 1];
 uint8_t PIDConfBuff[sizeof(PID_coefs_t) + 1];
@@ -258,6 +260,20 @@ static void bt_set_joystick_speeds(message_t message)
     joystick_max_turning_speed = speeds.turning_speed;
 }
 
+static void bt_toggle_angle_correction()
+{
+    angle_correction = !angle_correction;
+    if (angle_correction)
+    {
+        bt_send_message(&huart1, "Ang Corr ON");
+    }
+    else
+    {
+        bt_send_message(&huart1, "ANG Corr OFF");
+    }
+    
+}
+
 void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer)
 {
     message_t message;
@@ -347,6 +363,11 @@ void bt_process_received_buffer(UART_HandleTypeDef *huart, uint8_t *buffer)
     case SET_JOYSTICK_CONTROL:
     {
         bt_set_joystick_control(message);
+        break;
+    }
+    case TOGGLE_ANGLE_CORRECTION:
+    {
+        bt_toggle_angle_correction();
         break;
     }
     default:

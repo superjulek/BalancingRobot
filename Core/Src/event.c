@@ -36,6 +36,7 @@ extern float manual_driving_speed;
 extern float joystick_max_driving_speed;
 extern uint32_t batt_vol;
 extern float set_turining_speed;
+extern bool angle_correction;
 /**/
 
 static void flash_LED_callback(void)
@@ -136,7 +137,7 @@ static void movement_control_tic_callback(void)
 	{
 	case STOP:
 		/* Slowly fix mount angle */
-		if (abs(output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT)
+		if (abs(output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT && angle_correction)
 		{
 			mount_error += MOUNT_ANGLE_CORECTION * angle;
 			target_angle -= MOUNT_ANGLE_CORECTION * angle;
