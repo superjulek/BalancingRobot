@@ -42,9 +42,15 @@ struct private_PID_t
 
 	float delay_coef;
 
+	float input_smooth_coef;
+
+	float input_smooth;
+
 	PID_coefs_t coefs;
 
 	uint16_t frequency;
+
+	float desired_signal_smooth_coef;
 };
 
 /**
@@ -79,6 +85,7 @@ static void reset(PID_t *public)
 	this->output_signal = 0;
 	this->desired_signal = 0;
 	this->desired_signal_smooth = 0;
+	this->input_smooth = 0;
 }
 
 static void set_desired_signal(PID_t *public, float desired_signal)
@@ -96,9 +103,12 @@ static float get_desired_signal(PID_t *public)
 static void tic(PID_t *public, float input_signal)
 {
 	private_PID_t *this = (private_PID_t *)public;
-	this->desired_signal_smooth = this->desired_signal * (1 - DESIRED_SIGNAL_SMOOTHING) + DESIRED_SIGNAL_SMOOTHING * this->desired_signal_smooth;
-	float diff = input_signal - this->desired_signal_smooth;
-	put_in_history(this, input_signal);
+	/* Filter smoothing desired signal */
+	this->desired_signal_smooth = this->desired_signal * (1 - this->desired_signal_smooth_coef) + this->desired_signal_smooth_coef * this->desired_signal_smooth;
+	/* Filter smoothing input signal */
+	this->input_smooth = input_signal * (1 - this->input_smooth_coef) + this->input_smooth_coef * this->input_smooth;
+	float diff = this->input_smooth - this->desired_signal_smooth;
+	put_in_history(this, this->input_smooth);
 	float integral_sum = this->integral_sum + diff / (float)this->frequency;
 	this->previous_output_signal = this->output_signal;
 	float output_signal = this->coefs.KP_coef * diff +
@@ -115,7 +125,7 @@ static void tic(PID_t *public, float input_signal)
 	else if (fabs(output_signal) < this->dead_band)
 	{
 		this->output_signal = 0;
-		this->integral_sum = integral_sum;
+		//this->integral_sum = integral_sum;
 	}
 	else
 	{
@@ -133,6 +143,7 @@ static float get_output(PID_t *public)
 static float get_output_smooth(PID_t *public)
 {
 	private_PID_t *this = (private_PID_t *)public;
+	/* Filter smoothing output */
 	return (this->output_signal * (1.0 - this->delay_coef) +
 			this->previous_output_signal * this->delay_coef);
 }
@@ -149,7 +160,7 @@ static PID_coefs_t get_PID_coefs(PID_t *public, PID_coefs_t coefs)
 	return this->coefs;
 }
 
-PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float delay_coef)
+PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float delay_coef, float input_smooth_coef, float desired_signal_smooth_coef)
 {
 	private_PID_t *this = malloc(sizeof(private_PID_t));
 	*this = (private_PID_t){
@@ -167,7 +178,10 @@ PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, u
 		.dead_band = dead_band,
 		.max_output_signal = max_output_signal,
 		.frequency = frequency,
-		.delay_coef = delay_coef};
+		.delay_coef = delay_coef,
+		.input_smooth_coef = input_smooth_coef,
+		.desired_signal_smooth_coef = desired_signal_smooth_coef,
+		};
 
 	this->public.reset(&(this->public));
 

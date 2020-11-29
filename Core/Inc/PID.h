@@ -80,7 +80,7 @@ struct PID_t {
 /**
  * Create PID instance
  */
-PID_t* PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float delay_coef);
+PID_t* PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float delay_coef, float input_smooth_coef, float desired_signal_smooth_coef);
 
 // Get current robot angle
 float get_angle(void);

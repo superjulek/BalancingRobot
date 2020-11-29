@@ -132,14 +132,11 @@ event_t angle_PID_tic = {
 static void movement_control_tic_callback(void)
 {
 	int32_t output = (int32_t)angle_PID->get_output(angle_PID);
-	/* For smoother control */
-	static int32_t averaged_output = 0;
-	averaged_output = averaged_output * 0.1 + output * 0.9; // TODO: move this into PID method
 	switch (drive_command)
 	{
 	case STOP:
 		/* Slowly fix mount angle */
-		if (abs(averaged_output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT)
+		if (abs(output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT)
 		{
 			mount_error += MOUNT_ANGLE_CORECTION * angle;
 			target_angle -= MOUNT_ANGLE_CORECTION * angle;
@@ -150,7 +147,7 @@ static void movement_control_tic_callback(void)
 	case LEFT:
 	case RIGHT:
 	case JOYSTICK_SPEED:
-		speed_PID->tic(speed_PID, averaged_output);
+		speed_PID->tic(speed_PID, output);
 		target_angle = -speed_PID->get_output_smooth(speed_PID) / SPEED_PID_DIVIDER;
 		break;
 	}

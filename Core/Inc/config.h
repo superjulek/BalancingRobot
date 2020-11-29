@@ -13,19 +13,25 @@
 #define INIT_SPEED_KI 0.06
 #define INIT_SPEED_KD 0.0002
 
-#define INIT_ANGLE_KP 23000
-#define INIT_ANGLE_KI 190000
-#define INIT_ANGLE_KD 20
+#define INIT_ANGLE_KP 23000.
+#define INIT_ANGLE_KI 190000.
+#define INIT_ANGLE_KD 20.
 
-#define MAX_STEERING_ANGLE 3500 // in mdeg
+#define MAX_STEERING_ANGLE 3500. // in mdeg
 
-#define SPEED_DEADBAND 2000 // in mrpm
-#define ANGLE_DEADBAND 0
+#define ANGLE_PID_DEADBAND 000. // in mrpm
+#define SPEED_PID_DEADBAND 0.1 // in mdeg
 
-#define SPEED_PID_DIVIDER 1000
+#define SPEED_PID_DIVIDER 1000.
 
-#define ANGLE_PID_SMOOTHER 0.1
-#define SPEED_PID_SMOOTHER 0.5
+#define ANGLE_PID_DELAY_COEF 0.1
+#define SPEED_PID_DELAY_COEF 0.5
+
+#define SPEED_PID_INPUT_SMOOTH_COEF 0.5
+#define ANGLE_PID_INPUT_SMOOTH_COEF 0
+
+#define SPEED_PID_DESIRED_SIGNAL_SMOOTH_COEF 0
+#define ANGLE_PID_DESIRED_SIGNAL_SMOOTH_COEF 0.5
 
 /* Define below "TO BE DEFINED" from specific .h files */
 
@@ -45,11 +51,11 @@
 
 
 /*##### PID.h config #####*/
-#define ANGLE_CORRECTION 0.002
+#define ANGLE_CORRECTION 0.005
 
 #define MOUNT_ERROR -1.0
 
-#define DESIRED_SIGNAL_SMOOTHING 0.8
+#define DESIRED_SIGNAL_SMOOTHING 0.1
 /*########################*/
 
 

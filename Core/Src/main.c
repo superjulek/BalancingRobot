@@ -100,14 +100,14 @@ stepper_pins_t right_stepper_pins = {
 	},
 };
 PID_coefs_t angle_PID_coefs = {
-	.KP_coef = 23000,
-	.KI_coef = 190000,
-	.KD_coef = 20,
+	.KP_coef = INIT_ANGLE_KP,
+	.KI_coef = INIT_ANGLE_KI,
+	.KD_coef = INIT_ANGLE_KD,
 };
 PID_coefs_t speed_PID_coefs = {
-	.KP_coef = 0.025,
-	.KI_coef = 0.06,
-	.KD_coef = 0.0002,
+	.KP_coef = INIT_SPEED_KP,
+	.KI_coef = INIT_SPEED_KI,
+	.KD_coef = INIT_SPEED_KD,
 };
 pin_t MPU_power_pin = (pin_t){
 	.pin_port = MPU_POWER_GPIO_Port,
@@ -159,8 +159,8 @@ int main(void)
 	/* USER CODE BEGIN 1 */
 	left_stepper = stepper_create(left_stepper_pins, TRUE, &htim5, TIM_CHANNEL_1);
 	right_stepper = stepper_create(right_stepper_pins, FALSE, &htim2, TIM_CHANNEL_1);
-	angle_PID = PID_create(angle_PID_coefs, 2000, MAX_SPEED, 250, 0.1);
-	speed_PID = PID_create(speed_PID_coefs, 00, 3500., 250, 0.5);
+	angle_PID = PID_create(angle_PID_coefs, ANGLE_PID_DEADBAND, MAX_SPEED, 250, ANGLE_PID_DELAY_COEF, ANGLE_PID_INPUT_SMOOTH_COEF, ANGLE_PID_DESIRED_SIGNAL_SMOOTH_COEF);
+	speed_PID = PID_create(speed_PID_coefs, SPEED_PID_DEADBAND, MAX_STEERING_ANGLE, 250, SPEED_PID_DELAY_COEF, SPEED_PID_INPUT_SMOOTH_COEF, SPEED_PID_DESIRED_SIGNAL_SMOOTH_COEF);
 	scheduler = scheduler_create();
 	/* USER CODE END 1 */
 
