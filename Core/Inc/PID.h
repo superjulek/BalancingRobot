@@ -24,7 +24,6 @@
 /*#########################*/
 
 #define MAX_MOUNT_ANGLE_CORECTION_OUTPUT 7000
-#define MOUNT_ANGLE_CORECTION 0.00015
 
 typedef struct PID_coefs_t PID_coefs_t;
 typedef struct PID_t PID_t;

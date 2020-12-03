@@ -9,18 +9,18 @@
 #define INC_CONFIG_H_
 
 /* Steering defines */
-#define INIT_SPEED_KP 0.025
-#define INIT_SPEED_KI 0.06
-#define INIT_SPEED_KD 0.0002
+#define INIT_SPEED_KP 0.016
+#define INIT_SPEED_KI 0.02
+#define INIT_SPEED_KD 0.05
 
-#define INIT_ANGLE_KP 23000.
-#define INIT_ANGLE_KI 190000.
-#define INIT_ANGLE_KD 20.
+#define INIT_ANGLE_KP 37000.
+#define INIT_ANGLE_KI 100000.
+#define INIT_ANGLE_KD 1000.
 
 #define MAX_STEERING_ANGLE 3500. // in mdeg
 
-#define ANGLE_PID_DEADBAND 000. // in mrpm
-#define SPEED_PID_DEADBAND 0.1 // in mdeg
+#define ANGLE_PID_DEADBAND 00. // in mrpm
+#define SPEED_PID_DEADBAND 0.0 // in mdeg
 
 #define SPEED_PID_DIVIDER 1000. // to operate in mdeg
 
@@ -48,7 +48,7 @@
 
 
 /*##### PID.h config #####*/
-#define ANGLE_CORRECTION 0.005
+#define MOUNT_ANGLE_CORRECTION 0.0002
 
 #define MOUNT_ERROR -1.0
 
@@ -57,7 +57,7 @@
 
 
 /*##### MPU.h config #####*/
-#define ACC_PART 0.005
+#define ACC_PART 0.002
 
 #define I2C_TIMEOUT 1
 

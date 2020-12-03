@@ -95,7 +95,7 @@ static void send_telemetry_callback(void)
 		.Angle = angle,
 		.TargetSpeed = speed_PID->get_desired_signal(speed_PID),
 		.Speed = (float)((left_stepper->get_actual_speed(left_stepper) + right_stepper->get_actual_speed(right_stepper)) / 2),
-		.Battery = ((float)batt_vol * 0.001548 - 3) / (4.2 - 3),
+		.Battery = ((float)batt_vol * 0.001548 - 3.1) / (4.2 - 3.1),
 	};
 	bt_send_telemetry(&huart1, current_telemetry);
 	return;
@@ -139,9 +139,9 @@ static void movement_control_tic_callback(void)
 		/* Slowly fix mount angle */
 		if (abs(output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT && angle_correction)
 		{
-			mount_error += MOUNT_ANGLE_CORECTION * angle;
-			target_angle -= MOUNT_ANGLE_CORECTION * angle;
-			myMPU->set_mount_error(myMPU, mount_error);
+			float correction = MOUNT_ANGLE_CORRECTION * angle;
+			mount_error += correction;
+			target_angle -= correction;
 		}
 	case FORWARD:
 	case BACKWARD:

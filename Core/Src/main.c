@@ -122,7 +122,7 @@ uint8_t RxBuff[RECEIVED_BUFFER_SIZE];
 uint32_t batt_vol = 0;
 drive_command_t drive_command = STOP;
 volatile robot_state_t state = PROGRAM_CALIBRATING;
-bool angle_correction = TRUE;
+bool angle_correction = FALSE;
 
 float manual_turning_speed = TURNING_SPEED;
 float joystick_max_turning_speed = TURNING_SPEED * 2;
