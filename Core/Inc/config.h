@@ -9,13 +9,13 @@
 #define INC_CONFIG_H_
 
 /* Steering defines */
-#define INIT_SPEED_KP 0.025
-#define INIT_SPEED_KI 0.06
-#define INIT_SPEED_KD 0.0002
+#define INIT_SPEED_KP 0.016
+#define INIT_SPEED_KI 0.02
+#define INIT_SPEED_KD 0.05
 
-#define INIT_ANGLE_KP 23000.
-#define INIT_ANGLE_KI 190000.
-#define INIT_ANGLE_KD 20.
+#define INIT_ANGLE_KP 37000.
+#define INIT_ANGLE_KI 100000.
+#define INIT_ANGLE_KD 1000.
 
 #define MAX_STEERING_ANGLE 3500. // in mdeg
 
@@ -57,7 +57,7 @@
 
 
 /*##### MPU.h config #####*/
-#define ACC_PART 0.0001
+#define ACC_PART 0.001
 
 #define I2C_TIMEOUT 1
 
