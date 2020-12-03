@@ -19,8 +19,8 @@
 
 #define MAX_STEERING_ANGLE 3500. // in mdeg
 
-#define ANGLE_PID_DEADBAND 000. // in mrpm
-#define SPEED_PID_DEADBAND 0.1 // in mdeg
+#define ANGLE_PID_DEADBAND 00. // in mrpm
+#define SPEED_PID_DEADBAND 0.0 // in mdeg
 
 #define SPEED_PID_DIVIDER 1000. // to operate in mdeg
 
@@ -48,7 +48,7 @@
 
 
 /*##### PID.h config #####*/
-#define ANGLE_CORRECTION 0.005
+#define MOUNT_ANGLE_CORRECTION 0.0005
 
 #define MOUNT_ERROR -1.0
 
@@ -57,7 +57,7 @@
 
 
 /*##### MPU.h config #####*/
-#define ACC_PART 0.005
+#define ACC_PART 0.0001
 
 #define I2C_TIMEOUT 1
 

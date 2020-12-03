@@ -63,6 +63,11 @@ extern drive_command_t drive_command;
 extern float set_turining_speed;
 extern bool angle_correction;
 
+/* Variables for charts */
+extern float accelerometer_angle;
+extern float gyroscope_angle;
+extern float angle;
+
 uint8_t TelemetryBuff[sizeof(telemetry_t) + 1];
 uint8_t PIDConfBuff[sizeof(PID_coefs_t) + 1];
 uint8_t SpeedsBuff[sizeof(speeds_t) + 1];
@@ -179,6 +184,8 @@ static void bt_set_joystick_control(message_t message)
 
 static void bt_start_robot()
 {
+	accelerometer_angle = angle;
+	gyroscope_angle = angle;
     if (state == LAUNCHED)
     {
         bt_send_message(&huart1, "ALREADY RUNNING");

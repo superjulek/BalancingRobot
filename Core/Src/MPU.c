@@ -14,6 +14,10 @@
 #include <math.h>
 #include <stdio.h>
 
+/* Variables for charts */
+extern float accelerometer_angle;
+extern float gyroscope_angle;
+
 typedef struct private_MPU_t private_MPU_t;
 
 struct private_MPU_t
@@ -223,6 +227,10 @@ static float get_comp_angle(MPU_t *public)
         return 90;
     float acc_angle = atan(scaled_data.x / scaled_data.z) * 57.3 - this->mount_error;
     float gyro_angle = this->last_angle - scaled_data.ry * 1 / this->frequency;
+
+    accelerometer_angle = acc_angle;
+    gyroscope_angle -= scaled_data.ry * 1. / this->frequency;
+
     float new_angle = (1.0 - ACC_PART) * gyro_angle + ACC_PART * acc_angle;
     this->last_angle = new_angle;
     return new_angle;

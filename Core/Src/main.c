@@ -138,6 +138,10 @@ stepper_t *right_stepper;
 scheduler_t *scheduler;
 MPU_t *myMPU;
 
+/* Variables for charts */
+float accelerometer_angle;
+float gyroscope_angle;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

@@ -139,8 +139,9 @@ static void movement_control_tic_callback(void)
 		/* Slowly fix mount angle */
 		if (abs(output) < MAX_MOUNT_ANGLE_CORECTION_OUTPUT && angle_correction)
 		{
-			mount_error += MOUNT_ANGLE_CORECTION * angle;
-			target_angle -= MOUNT_ANGLE_CORECTION * angle;
+			float correction = MOUNT_ANGLE_CORRECTION * fabs(angle) / angle;
+			mount_error += correction;
+			target_angle -= correction;
 			myMPU->set_mount_error(myMPU, mount_error);
 		}
 	case FORWARD:
