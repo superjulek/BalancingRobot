@@ -9,7 +9,7 @@
 #define INC_CONFIG_H_
 
 /* Steering defines */
-#define INIT_SPEED_KP 0.024
+#define INIT_SPEED_KP 0.022
 #define INIT_SPEED_KI 0.03
 #define INIT_SPEED_KD 0.05
 
@@ -17,7 +17,7 @@
 #define INIT_ANGLE_KI 150000.
 #define INIT_ANGLE_KD 10.
 
-#define MAX_STEERING_ANGLE 3500. // in mdeg
+#define MAX_STEERING_ANGLE 4000. // in mdeg
 
 #define ANGLE_PID_DEADBAND 00. // in mrpm
 #define SPEED_PID_DEADBAND 0.0 // in mdeg
