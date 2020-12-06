@@ -79,6 +79,11 @@ struct PID_t
 	void (*set_desired_signal_to_ramp)(PID_t *public, float desired_signal_to_ramp);
 
 	/**
+	 * Get new desired signal to be ramped
+	 */
+	float (*get_desired_signal_to_ramp)(PID_t *public);
+
+	/**
 	 * Do ramp
 	 */
 	void (*ramp)(PID_t *public);
