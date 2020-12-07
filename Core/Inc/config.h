@@ -8,6 +8,10 @@
 #ifndef INC_CONFIG_H_
 #define INC_CONFIG_H_
 
+/* Global defines */
+
+//#define CLIMBING_MODE
+
 /* Steering defines */
 #define INIT_SPEED_KP 0.022
 #define INIT_SPEED_KI 0.03
@@ -17,7 +21,11 @@
 #define INIT_ANGLE_KI 150000.
 #define INIT_ANGLE_KD 10.
 
+#ifndef CLIMBING_MODE
 #define MAX_STEERING_ANGLE 4000. // in mdeg
+#else
+#define MAX_STEERING_ANGLE 30000.
+#endif
 
 #define ANGLE_PID_DEADBAND 00. // in mrpm
 #define SPEED_PID_DEADBAND 0.0 // in mdeg
@@ -37,7 +45,11 @@
 
 #define MAX_STANDING_SPEED 4000
 
+#ifndef CLIMBING_MODE
 #define MAX_ANGLE 8
+#else
+#define MAX_ANGLE 40
+#endif
 
 #define MAX_TURNING_SPEED 150000
 #define TURNING_SPEED 50000
