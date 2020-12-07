@@ -21,6 +21,8 @@
  * ACC_PART - accelerometer part in angle calculation
  * 
  * MOUNT_ERROR - mounting error set at startup
+ *
+ * GYRO_Z_AXIS_ERROR - angle of robot Z axis overlap on gyro Y axis in rad
  */
 /*#########################*/
 

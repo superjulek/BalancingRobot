@@ -15,12 +15,6 @@ RM := rm -rf
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(strip $(S_DEPS)),)
--include $(S_DEPS)
-endif
-ifneq ($(strip $(S_UPPER_DEPS)),)
--include $(S_UPPER_DEPS)
-endif
 ifneq ($(strip $(C_DEPS)),)
 -include $(C_DEPS)
 endif
@@ -46,8 +40,8 @@ Robot_v2.0.bin \
 all: Robot_v2.0.elf secondary-outputs
 
 # Tool invocations
-Robot_v2.0.elf: $(OBJS) $(USER_OBJS) /home/juliusz/Documents/Robot_v2.0/STM32F446RETX_FLASH.ld
-	arm-none-eabi-gcc -o "Robot_v2.0.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/juliusz/Documents/Robot_v2.0/STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Robot_v2.0.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
+Robot_v2.0.elf: $(OBJS) $(USER_OBJS) C:\Users\super\Dokumenty\Politechnika\ Warszawska\Dyplom\Code\Robot\STM32F446RETX_FLASH.ld
+	arm-none-eabi-gcc -o "Robot_v2.0.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\super\Dokumenty\Politechnika Warszawska\Dyplom\Code\Robot\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Robot_v2.0.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

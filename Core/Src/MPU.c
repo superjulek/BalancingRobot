@@ -222,7 +222,7 @@ static float get_comp_angle(MPU_t *public)
     if (scaled_data.z == 0)
         return 90;
     float acc_angle = atan(scaled_data.x / scaled_data.z) * 57.3 - this->mount_error;
-    float gyro_angle = this->last_angle - scaled_data.ry * 1 / this->frequency;
+    float gyro_angle = this->last_angle - (scaled_data.ry - scaled_data.rz * sin(GYRO_Z_AXIS_ERROR)) * 1 / this->frequency;
     float new_angle = (1.0 - ACC_PART) * gyro_angle + ACC_PART * acc_angle;
     this->last_angle = new_angle;
     return new_angle;

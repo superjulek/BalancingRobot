@@ -62,6 +62,8 @@
 #define I2C_TIMEOUT 1
 
 #define CALIBRATION_ROUNDS 2000
+
+#define GYRO_Z_AXIS_ERROR -0.017
 /*########################*/
 
 /*#### event.h config ####*/
