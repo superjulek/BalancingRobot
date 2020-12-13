@@ -10,7 +10,7 @@
 
 /* Global defines */
 
-//#define CLIMBING_MODE
+#define CLIMBING_MODE
 
 /* Steering defines */
 #define INIT_SPEED_KP 0.022
@@ -32,10 +32,10 @@
 
 #define SPEED_PID_DIVIDER 1000. // to operate in mdeg
 
-#define SPEED_PID_DIFF_AVERAGE_COEF 0.55
-#define ANGLE_PID_DIFF_AVERAGE_COEF 0.95
+#define SPEED_PID_DIFF_AVERAGE_COEF 0.6
+#define ANGLE_PID_DIFF_AVERAGE_COEF 0.96
 
-#define SPEED_PID_MAX_CHANGE 1000000
+#define SPEED_PID_MAX_CHANGE 750000
 #define ANGLE_PID_MAX_CHANGE 0 // no ramp for angle pid
 
 /* Define below "TO BE DEFINED" from specific .h files */
@@ -63,13 +63,11 @@
 #define MOUNT_ANGLE_CORRECTION 0.0004
 
 #define MOUNT_ERROR -1.0
-
-#define DESIRED_SIGNAL_SMOOTHING 0.1
 /*########################*/
 
 
 /*##### MPU.h config #####*/
-#define ACC_PART 0.001
+#define ACC_PART 0.0007
 
 #define I2C_TIMEOUT 1
 
@@ -89,7 +87,7 @@
 /*########################*/
 
 /*### stepper.h config ###*/
-#define ACCELERATION 60000
+#define ACCELERATION 50000
 
 #define RAMP_FREQUENCY 100
 

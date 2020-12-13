@@ -18,8 +18,6 @@
  * ACC_PART - accelerometer part in angle calculation
  * 
  * MOUNT_ERROR - mounting error set at startup
- * 
- * DESIRED_SIGNAL_SMOOTHING - coef of smoothing desired signal
  */
 /*#########################*/
 
