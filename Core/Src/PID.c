@@ -68,7 +68,7 @@ static float get_derivative(private_PID_t *this)
 	//float derivative = (11. / 6. * this->previous_diffs[0] - 3. * this->previous_diffs[1] +
 	//					3. / 2. * this->previous_diffs[2] - 1. / 3. * this->previous_diffs[3]) *
 	//				   (float)this->frequency;
-	float derivative = (this->previous_diffs[0] - this->previous_diffs[1]) / (float) this->frequency;
+	float derivative = (this->previous_diffs[0] - this->previous_diffs[1]) / (float)this->frequency;
 	return derivative;
 }
 
@@ -152,25 +152,31 @@ static PID_coefs_t get_PID_coefs(PID_t *public, PID_coefs_t coefs)
 static void ramp(PID_t *public)
 {
 	private_PID_t *this = (private_PID_t *)public;
-		float diff = this->desired_output_to_ramp - this->desired_signal;
-		if (diff > this->max_diff)
-		{
-			this->desired_signal = this->desired_signal + this->max_diff;
-		}
-		else if (diff < -this->max_diff)
-		{
-			this->desired_signal = this->desired_signal - this->max_diff;
-		}
-		else
-		{
-			this->desired_signal = this->desired_output_to_ramp;
-		}
+	float diff = this->desired_output_to_ramp - this->desired_signal;
+	if (diff > this->max_diff)
+	{
+		this->desired_signal = this->desired_signal + this->max_diff;
+	}
+	else if (diff < -this->max_diff)
+	{
+		this->desired_signal = this->desired_signal - this->max_diff;
+	}
+	else
+	{
+		this->desired_signal = this->desired_output_to_ramp;
+	}
 }
 
-static void set_desired_signal_to_ramp (PID_t *public, float desired_signal_to_ramp)
+static void set_desired_signal_to_ramp(PID_t *public, float desired_signal_to_ramp)
 {
 	private_PID_t *this = (private_PID_t *)public;
 	this->desired_output_to_ramp = desired_signal_to_ramp;
+}
+
+float get_desired_signal_to_ramp(PID_t *public)
+{
+	private_PID_t *this = (private_PID_t *)public;
+	return this->desired_output_to_ramp;
 }
 
 PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, uint16_t frequency, float diff_average_coef, float max_change)
@@ -186,6 +192,7 @@ PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, u
 			.set_PID_coefs = set_PID_coefs,
 			.get_PID_coefs = get_PID_coefs,
 			.set_desired_signal_to_ramp = set_desired_signal_to_ramp,
+			.get_desired_signal_to_ramp = get_desired_signal_to_ramp,
 			.ramp = ramp,
 		},
 		.coefs = coefs,
@@ -194,7 +201,7 @@ PID_t *PID_create(PID_coefs_t coefs, float dead_band, float max_output_signal, u
 		.frequency = frequency,
 		.diff_average_coef = diff_average_coef,
 		.max_diff = max_change / frequency,
-		};
+	};
 
 	this->public.reset(&(this->public));
 

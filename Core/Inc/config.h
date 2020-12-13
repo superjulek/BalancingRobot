@@ -8,16 +8,24 @@
 #ifndef INC_CONFIG_H_
 #define INC_CONFIG_H_
 
+/* Global defines */
+
+//#define CLIMBING_MODE
+
 /* Steering defines */
-#define INIT_SPEED_KP 0.016
-#define INIT_SPEED_KI 0.02
+#define INIT_SPEED_KP 0.022
+#define INIT_SPEED_KI 0.03
 #define INIT_SPEED_KD 0.05
 
-#define INIT_ANGLE_KP 37000.
-#define INIT_ANGLE_KI 100000.
-#define INIT_ANGLE_KD 1000.
+#define INIT_ANGLE_KP 29000.
+#define INIT_ANGLE_KI 150000.
+#define INIT_ANGLE_KD 10.
 
-#define MAX_STEERING_ANGLE 3500. // in mdeg
+#ifndef CLIMBING_MODE
+#define MAX_STEERING_ANGLE 4000. // in mdeg
+#else
+#define MAX_STEERING_ANGLE 30000.
+#endif
 
 #define ANGLE_PID_DEADBAND 00. // in mrpm
 #define SPEED_PID_DEADBAND 0.0 // in mdeg
@@ -37,7 +45,11 @@
 
 #define MAX_STANDING_SPEED 4000
 
+#ifndef CLIMBING_MODE
 #define MAX_ANGLE 8
+#else
+#define MAX_ANGLE 40
+#endif
 
 #define MAX_TURNING_SPEED 150000
 #define TURNING_SPEED 50000
@@ -48,7 +60,7 @@
 
 
 /*##### PID.h config #####*/
-#define MOUNT_ANGLE_CORRECTION 0.0005
+#define MOUNT_ANGLE_CORRECTION 0.0004
 
 #define MOUNT_ERROR -1.0
 
@@ -62,6 +74,8 @@
 #define I2C_TIMEOUT 1
 
 #define CALIBRATION_ROUNDS 2000
+
+#define GYRO_Z_AXIS_ERROR -0.017
 /*########################*/
 
 /*#### event.h config ####*/
