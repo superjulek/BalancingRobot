@@ -142,6 +142,7 @@ static void movement_control_tic_callback(void)
 			float correction = MOUNT_ANGLE_CORRECTION * angle;
 			mount_error += correction;
 			target_angle -= correction;
+			myMPU->set_mount_error(myMPU, mount_error);
 		}
 	case FORWARD:
 	case BACKWARD:
