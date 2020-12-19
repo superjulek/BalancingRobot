@@ -17,9 +17,9 @@
 #define INIT_SPEED_KI 0.03
 #define INIT_SPEED_KD 0.05
 
-#define INIT_ANGLE_KP 29000.
-#define INIT_ANGLE_KI 150000.
-#define INIT_ANGLE_KD 10.
+#define INIT_ANGLE_KP 14500.
+#define INIT_ANGLE_KI 75000.
+#define INIT_ANGLE_KD 5.
 
 #ifndef CLIMBING_MODE
 #define MAX_STEERING_ANGLE 4000. // in mdeg
@@ -35,7 +35,7 @@
 #define SPEED_PID_DIFF_AVERAGE_COEF 0.6
 #define ANGLE_PID_DIFF_AVERAGE_COEF 0.96
 
-#define SPEED_PID_MAX_CHANGE 750000
+#define SPEED_PID_MAX_CHANGE 375000
 #define ANGLE_PID_MAX_CHANGE 0 // no ramp for angle pid
 
 /* Define below "TO BE DEFINED" from specific .h files */
@@ -43,7 +43,7 @@
 /*#### general config ####*/
 #define MAX_ANGLE_STANDING 0.7
 
-#define MAX_STANDING_SPEED 4000
+#define MAX_STANDING_SPEED 2000
 
 #ifndef CLIMBING_MODE
 #define MAX_ANGLE 8
@@ -51,11 +51,11 @@
 #define MAX_ANGLE 40
 #endif
 
-#define MAX_TURNING_SPEED 150000
-#define TURNING_SPEED 50000
+#define MAX_TURNING_SPEED 75000
+#define TURNING_SPEED 25000
 
-#define MAX_DRIVING_SPEED 500000
-#define DRIVING_SPEED 100000
+#define MAX_DRIVING_SPEED 250000
+#define DRIVING_SPEED 50000
 /*########################*/
 
 
@@ -87,15 +87,15 @@
 /*########################*/
 
 /*### stepper.h config ###*/
-#define ACCELERATION 50000
+#define ACCELERATION 25000
 
 #define RAMP_FREQUENCY 100
 
-#define CLOCK_FREQUENCY 12000000
+#define CLOCK_FREQUENCY 6000000
 
 #define STEPS_PER_REVOLUTION 200
 
-#define MAX_SPEED 800000
+#define MAX_SPEED 400000
 
 #define MAX_STEPPING_INTERVAL 4000
 /*########################*/

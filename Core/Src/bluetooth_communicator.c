@@ -234,7 +234,7 @@ static void bt_set_manual_speeds(message_t message)
         speeds.driving_speed = (float)MAX_DRIVING_SPEED;
     if (speeds.driving_speed < 0)
         speeds.driving_speed = 0;
-    if (speeds.turning_speed > MAX_DRIVING_SPEED)
+    if (speeds.turning_speed > MAX_TURNING_SPEED)
         speeds.turning_speed = (float)MAX_TURNING_SPEED;
     if (speeds.turning_speed < 0)
         speeds.turning_speed = 0;
