@@ -308,7 +308,7 @@ void HAL_SYSTICK_Callback(void)
 			scheduler->add_to_queue(scheduler, wait_for_angle);
 		}
 		/* 2 Hz */
-		if (counter % 500 == 0)
+		if (counter % 100 == 0)
 		{
 			scheduler->add_to_queue(scheduler, send_telemetry);
 		}
