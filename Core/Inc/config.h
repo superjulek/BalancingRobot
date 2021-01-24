@@ -13,8 +13,8 @@
 #define CLIMBING_MODE // more aggressive steering
 
 /* Steering defines */
-#define INIT_SPEED_KP 0.022
-#define INIT_SPEED_KI 0.03
+#define INIT_SPEED_KP 0.04
+#define INIT_SPEED_KI 0.06
 #define INIT_SPEED_KD 0.05
 
 #define INIT_ANGLE_KP 14500.
